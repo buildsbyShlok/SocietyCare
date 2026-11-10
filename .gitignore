@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment — never commit real secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Prisma generated client (regenerated on install)
+server/node_modules/
+
+# Coverage
+coverage/
+
+# Temp
+*.tmp
+*.temp
+.qa-credentials.local.md
+
+.qa-integration-login.local.json
+
+# Runtime uploads and temporary files
+uploads/
+tmp/
+temp/
+
+# Deployment
+.vercel/
+
+# Local database backups
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.backup
+
+# Generated reports and test artifacts
+qa-artifacts/

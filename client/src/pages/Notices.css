@@ -1,0 +1,201 @@
+/* Notice cards retain independent management controls and full-card detail links. */
+.notices-board {
+  gap: 24px;
+}
+.notices-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 20px;
+}
+.notice-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 26px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+.notice-card:hover {
+  background: var(--color-bg-surface);
+  box-shadow: none;
+  border-color: var(--color-accent-border);
+}
+.notice-card--pinned {
+  border-top: 3px solid var(--color-accent);
+}
+.notice-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.notice-title-group {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1 1 220px;
+}
+.notice-card-title {
+  flex-basis: 100%;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  margin: 3px 0 0;
+}
+.notice-card-title a {
+  color: var(--color-gray-900);
+  text-decoration: none;
+}
+.notice-card-title a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.notice-card-title a:hover {
+  color: var(--color-accent-highlight);
+}
+.notice-card-title a:focus-visible::after {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.notice-category,
+.notice-pin-badge {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-gray-500);
+}
+.notice-pin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.notice-category {
+  letter-spacing: 0.02em;
+}
+.notice-card-content {
+  color: var(--color-gray-500);
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  max-width: 75ch;
+}
+.notice-card-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--color-gray-500);
+  padding-top: 18px;
+  margin-top: 6px;
+  border-top: 1px solid var(--color-gray-200);
+}
+.notice-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.notice-card-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.notice-card-actions .btn {
+  background: transparent;
+  box-shadow: none;
+  border-color: var(--color-gray-200);
+}
+.notice-card-actions .is-pinned-btn {
+  color: var(--color-accent-highlight);
+  border-color: var(--color-accent-border);
+}
+.notice-inline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inline-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+.inline-form-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+.inline-close-btn {
+  background: transparent;
+  border: 0;
+  padding: 8px;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  display: flex;
+}
+.notice-inline-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.notices-empty {
+  background: transparent;
+  box-shadow: none;
+  border: 0;
+  text-align: center;
+  padding: 40px 0;
+}
+.notices-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+@media (max-width: 800px) {
+  .notices-list {
+    grid-template-columns: 1fr;
+  }
+  .notice-card-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+  .notice-card {
+    padding: 22px;
+  }
+  .notice-card-title {
+    font-size: 18px;
+  }
+  .notice-card-actions {
+    gap: 8px;
+  }
+  .notice-card-footer {
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,31 @@
+.community-noticeboard {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:26px;
+  padding:32px 24px 42px; margin:20px 0 30px; background:var(--color-bg-elevated);
+  border-radius:12px; position:relative; isolation:isolate;
+}
+.board-note {
+  --paper:#e9e3d2; --ink:#273b43; --ink-muted:#50606a;
+  position:relative; display:flex; flex-direction:column; gap:22px; min-height:280px; min-width:0;
+  padding:32px 24px 20px; color:var(--ink); background:var(--paper); border-radius:3px 3px 18px 3px;
+  box-shadow:2px 7px 12px #00000026; text-decoration:none; transform:rotate(-.6deg);
+  transition:transform .22s ease-out,box-shadow .22s ease-out;
+}
+.board-note-tone-1 { --paper:#d8e5de; transform:translateY(10px) rotate(.8deg); }
+.board-note-tone-2 { --paper:#e0e2ee; transform:rotate(-.3deg); }
+.board-note:hover,.board-note:focus-visible { transform:translateY(-5px) rotate(0); box-shadow:3px 12px 20px #00000032; z-index:1; color:var(--ink); }
+.board-note:focus-visible { outline:3px solid var(--color-accent); outline-offset:5px; }
+.board-note-pin { position:absolute; top:10px; left:calc(50% - 4px); width:8px; height:8px; background:#597482; border-radius:50%; box-shadow:1px 3px 3px #26353b55; }
+.board-note-pinned .board-note-pin { background:#4161b6; }
+.board-note-meta { display:flex; justify-content:space-between; gap:12px; color:var(--ink-muted); font-size:11px; font-weight:600; }
+.board-note-meta span { display:inline-flex; gap:4px; align-items:center; overflow-wrap:anywhere; }
+.board-note h3 { color:var(--ink); font-family:var(--font-heading); font-size:22px; line-height:1.3; letter-spacing:-.025em; margin:0 0 13px; overflow-wrap:anywhere; }
+.board-note p { color:var(--ink-muted); font-size:13px; line-height:1.8; margin:0; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:4; overflow:hidden; overflow-wrap:anywhere; white-space:pre-line; }
+.board-note-footer { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; border-top:1px solid #50606a30; padding-top:16px; margin-top:auto; color:var(--ink-muted); font-size:11px; }
+.board-note-footer span { display:flex; align-items:center; gap:4px; color:var(--ink); font-weight:600; }
+@media(max-width:1100px) { .community-noticeboard { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:620px) {
+  .community-noticeboard { grid-template-columns:1fr; padding:24px 18px; gap:24px; }
+  .board-note,.board-note-tone-1,.board-note-tone-2 { transform:none; min-height:240px; }
+  .board-note:hover,.board-note:focus-visible { transform:none; }
+}
+@media(prefers-reduced-motion:reduce) { .board-note { transition:none; }.board-note:hover,.board-note:focus-visible { transform:none; } }

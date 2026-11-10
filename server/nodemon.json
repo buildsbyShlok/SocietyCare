@@ -1,0 +1,12 @@
+{
+  "watch": [
+    "server.js",
+    "app.js",
+    "src",
+    ".env"
+  ],
+  "ext": "js,json,env",
+  "ignore": [
+    "tests/**"
+  ]
+}

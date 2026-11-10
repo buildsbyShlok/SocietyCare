@@ -1,0 +1,159 @@
+/* SocietyCare semantic theme. Compatibility aliases keep existing components on one palette. */
+:root {
+  color-scheme: dark;
+  --font-family:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-heading: "Geist", "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-size-2xs: 0.6875rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --color-bg-canvas: #0b0d12;
+  --color-bg-base: #0b0d12;
+  --color-bg-surface: #151820;
+  --color-bg-elevated: #1e222d;
+  --color-bg-hover: #252a36;
+  --color-bg-active: #2b3140;
+  --color-gray-50: #0b0d12;
+  --color-gray-100: #151820;
+  --color-gray-200: #303541;
+  --color-gray-300: #525b6d;
+  --color-gray-400: #a4acba;
+  --color-gray-500: #a4acba;
+  --color-gray-600: #c4cad5;
+  --color-gray-700: #dce1ea;
+  --color-gray-800: #ebeef5;
+  --color-gray-900: #f6f7fb;
+  --color-accent: #8b9aff;
+  --color-accent-dark: #a3afff;
+  --color-accent-darker: #b8c1ff;
+  --color-accent-highlight: #aab5ff;
+  --color-accent-light: #232a48;
+  --color-accent-border: #505f9d;
+  --color-on-accent: #0b0d12;
+  --color-control-border: #707b90;
+  --color-secondary: var(--color-accent-highlight);
+  --color-primary: var(--color-accent);
+  --color-primary-dark: var(--color-accent-dark);
+  --color-primary-light: var(--color-accent-light);
+  --color-success: #83c9a7;
+  --color-success-light: #172d25;
+  --color-success-border: #396750;
+  --color-warning: #e8bd73;
+  --color-warning-light: #30271a;
+  --color-warning-border: #776039;
+  --color-danger: #f29aa4;
+  --color-danger-light: #351f27;
+  --color-danger-border: #81505b;
+  --color-status-open: #b0bcf7;
+  --color-status-open-bg: #232a48;
+  --color-status-open-border: #505f9d;
+  --color-status-in-progress: var(--color-warning);
+  --color-status-in-progress-bg: var(--color-warning-light);
+  --color-status-in-progress-border: var(--color-warning-border);
+  --color-status-resolved: var(--color-success);
+  --color-status-resolved-bg: var(--color-success-light);
+  --color-status-resolved-border: var(--color-success-border);
+  --color-priority-low: var(--color-gray-500);
+  --color-priority-low-bg: var(--color-bg-elevated);
+  --color-priority-low-border: var(--color-gray-200);
+  --color-priority-medium: var(--color-warning);
+  --color-priority-medium-bg: var(--color-warning-light);
+  --color-priority-medium-border: var(--color-warning-border);
+  --color-priority-high: var(--color-danger);
+  --color-priority-high-bg: var(--color-danger-light);
+  --color-priority-high-border: var(--color-danger-border);
+  --color-surface: var(--color-bg-surface);
+  --color-surface-hover: var(--color-bg-hover);
+  --color-border: var(--color-gray-200);
+  --color-border-hover: var(--color-gray-300);
+  --color-bg-subtle: var(--color-bg-elevated);
+  /* ── Spacing Scale ───────────────────────────────────────── */
+  --space-0-5: 0.125rem; /* 2px */
+  --space-1: 0.25rem; /* 4px */
+  --space-2: 0.5rem; /* 8px */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.25rem; /* 20px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-10: 2.5rem; /* 40px */
+  --space-12: 3rem; /* 48px */
+  --space-16: 4rem; /* 64px */
+
+  /* ── Border Radius ───────────────────────────────────────── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ── Modern SaaS Shadows & Glows ─────────────────────────── */
+  --shadow-sm: none;
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 18px 36px rgba(0, 0, 0, 0.24);
+  --shadow-emerald: none;
+  --shadow-glow: none;
+
+  /* ── Native Controls ─────────────────────────────────────── */
+  accent-color: var(--color-accent);
+  --color-scrollbar-track: var(--color-bg-base);
+  --color-scrollbar-thumb: var(--color-gray-300);
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+
+  /* ── Layout & Responsive Constants ───────────────────────── */
+  --container-max-width: 1280px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed-w: 72px;
+  --navbar-height: 64px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg-canvas: #f8f9fb;
+  --color-bg-base: #f8f9fb;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #f1f3f7;
+  --color-bg-hover: #ebeef5;
+  --color-bg-active: #e3e7f2;
+  --color-gray-50: #f8f9fb;
+  --color-gray-100: #f1f3f7;
+  --color-gray-200: #e5e8ed;
+  --color-gray-300: #b5bdca;
+  --color-gray-400: #626976;
+  --color-gray-500: #626976;
+  --color-gray-600: #434a56;
+  --color-gray-700: #303641;
+  --color-gray-800: #222730;
+  --color-gray-900: #111318;
+  --color-accent: #435cf5;
+  --color-accent-dark: #354bce;
+  --color-accent-darker: #2b3eac;
+  --color-accent-highlight: #354bce;
+  --color-accent-light: #edf0ff;
+  --color-accent-border: #c5cdfa;
+  --color-on-accent: #ffffff;
+  --color-control-border: #7b8595;
+  --color-success: #24714d;
+  --color-success-light: #eaf5ef;
+  --color-success-border: #b8d9c6;
+  --color-warning: #805510;
+  --color-warning-light: #fbf2e2;
+  --color-warning-border: #e8d5b1;
+  --color-danger: #ad3043;
+  --color-danger-light: #fceef0;
+  --color-danger-border: #eac3cb;
+  --color-status-open: #4356b8;
+  --color-status-open-bg: #edf0ff;
+  --color-status-open-border: #c5cdfa;
+  --shadow-md: 0 4px 16px rgba(17, 19, 24, 0.06);
+  --shadow-lg: 0 12px 28px rgba(17, 19, 24, 0.1);
+}

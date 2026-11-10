@@ -1,0 +1,357 @@
+/**
+ * ai.service.js — Groq LLM integration for complaint analysis.
+ *
+ * Calls the Groq Chat Completions API with a strict JSON prompt.
+ * Tries 2 models in priority order; if a model fails it falls through
+ * to the next. All errors bubble up as ApiError instances.
+ *
+ * Expected LLM output (strict JSON, no markdown):
+ * {
+ *   "title":      "Concise issue title",
+ *   "category":   "PLUMBING" | "ELECTRICAL" | "CLEANING" | "SECURITY" | "LIFT" | "PARKING" | "OTHER",
+ *   "priority":   "LOW" | "MEDIUM" | "HIGH",
+ *   "summary":    "One-sentence summary for admin",
+ *   "reasoning":  "Why this category and priority were chosen",
+ *   "confidence": 0-100
+ * }
+ */
+
+const ApiError  = require('../utils/ApiError');
+const prisma    = require('../config/db');
+const { STATUS } = require('../utils/constants');
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+/** Priority order for model fallback */
+const MODELS = [
+  'openai/gpt-oss-20b',
+  'openai/gpt-oss-120b',
+];
+
+const VALID_CATEGORIES = ['PLUMBING', 'ELECTRICAL', 'CLEANING', 'SECURITY', 'LIFT', 'PARKING', 'OTHER'];
+const VALID_PRIORITIES  = ['LOW', 'MEDIUM', 'HIGH'];
+
+// ─── System Prompt ────────────────────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are a complaint analyst for a residential society management system.
+
+When given a resident's complaint text, you MUST respond with STRICT JSON only.
+Do NOT include markdown, code fences, explanations, or any text outside the JSON object.
+
+Return exactly this JSON structure:
+{
+  "title": "A concise 5-10 word title summarising the issue",
+  "category": "One of: PLUMBING, ELECTRICAL, CLEANING, SECURITY, LIFT, PARKING, OTHER",
+  "priority": "One of: LOW, MEDIUM, HIGH",
+  "refinedDescription": "A grammatically corrected, professionally written version of the input description, keeping all original facts intact. If the input is already clear, return it verbatim.",
+  "summary": "One sentence summary suitable for an admin dashboard",
+  "reasoning": "Brief explanation of why you chose this category and priority",
+  "confidence": <integer 0-100 representing your confidence in this classification>
+}
+
+Category definitions:
+- PLUMBING: water leaks, pipe issues, drainage, taps, toilets
+- ELECTRICAL: power outages, wiring, short circuits, lighting, switches
+- CLEANING: garbage, dirt, hygiene, common area cleanliness
+- SECURITY: unauthorized access, broken locks, CCTV, guard issues
+- LIFT: elevator malfunction, service, noise, doors
+- PARKING: parking violations, blocked spaces, signage
+- OTHER: anything that does not fit the above categories
+
+Priority definitions:
+- HIGH: safety hazard, affects many residents, service outage, immediate risk
+- MEDIUM: inconvenience, affects few residents, non-urgent repair needed
+- LOW: cosmetic issue, minor inconvenience, routine maintenance
+
+Respond with only the JSON object. No preamble. No postamble.`;
+
+// ─── Core Groq Call ───────────────────────────────────────────────────────────
+
+/**
+ * Calls Groq with a specific model. Returns raw content string or throws.
+ *
+ * Accepts an optional systemPrompt so duplicate detection can reuse
+ * the same HTTP plumbing with a different prompt.
+ *
+ * @param {string} model        - Groq model identifier
+ * @param {string} userMessage  - The user-role message content
+ * @param {string} apiKey       - Groq API key
+ * @param {string} [systemPrompt=SYSTEM_PROMPT] - System prompt override
+ * @returns {Promise<string>} Raw LLM response content string
+ */
+async function callGroqModel(model, userMessage, apiKey, systemPrompt = SYSTEM_PROMPT) {
+  let response, data;
+  try {
+    response = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + apiKey.trim(), 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(12000),
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }],
+        temperature: 0.2,
+        max_completion_tokens: 1200,
+        reasoning_effort: 'low',
+        response_format: { type: 'json_object' },
+      }),
+    });
+    if (!response.ok) {
+      // Never log/forward provider bodies: they may contain account or request details.
+      await response.body?.cancel();
+      if (response.status === 401 || response.status === 403)
+        throw new ApiError(503, 'AI provider rejected its credentials or access. Contact the administrator; you can still submit manually.');
+      if (response.status === 429) {
+        const error = new ApiError(429, 'AI usage limit reached. Please try again later or submit manually.');
+        error.retryAfter = Math.min(3600, Math.max(1, Number(response.headers?.get('retry-after')) || 60));
+        throw error;
+      }
+      throw new ApiError(502, 'AI provider is temporarily unavailable. Please retry or submit manually.');
+    }
+    data = await response.json();
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (['TimeoutError', 'AbortError'].includes(error.name))
+      throw new ApiError(504, 'AI request timed out. Please retry or submit manually.');
+    throw new ApiError(502, 'Could not reach the AI provider. Please retry or submit manually.');
+  }
+  const content = data?.choices?.[0]?.message?.content;
+  if (typeof content !== 'string' || !content.trim() || data.choices[0].finish_reason === 'length')
+    throw new ApiError(422, 'AI returned an incomplete response. Please retry or submit manually.');
+  return content;
+}
+
+// Only retry model-specific/unavailable or malformed responses. Avoid multiplying
+// authentication failures, quota failures or timeouts across models.
+async function requestStructured(userMessage, systemPrompt, parse) {
+  const apiKey = process.env.GROQ_API_KEY?.trim();
+  if (!apiKey) throw new ApiError(503, 'AI service is not configured. Contact the administrator; you can still submit manually.');
+  let lastError;
+  for (const model of MODELS) {
+    try { return parse(await callGroqModel(model, userMessage, apiKey, systemPrompt)); }
+    catch (error) {
+      if (![422, 502].includes(error.statusCode)) throw error;
+      lastError = error;
+    }
+  }
+  throw lastError;
+}
+
+// ─── Response Validator ───────────────────────────────────────────────────────
+
+/**
+ * Parses and validates the LLM JSON response.
+ * Normalises category and priority to uppercase enums.
+ * Throws ApiError(422) if the shape is invalid.
+ *
+ * @param {string} rawContent - Raw string from LLM
+ * @returns {object} Validated and normalised result
+ */
+function parseAndValidate(rawContent) {
+  let parsed;
+  try {
+    // Strip markdown fences just in case the model ignores instructions
+    const cleaned = rawContent.replace(/```(?:json)?/gi, '').trim();
+    parsed = JSON.parse(cleaned);
+  } catch {
+    throw new ApiError(422, 'AI returned malformed JSON. Please try again.');
+  }
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
+    throw new ApiError(422, 'AI returned an invalid response. Please retry.');
+  const { title, category, priority, refinedDescription, summary, reasoning, confidence } = parsed;
+
+  if (typeof title !== 'string' || !title.trim()) {
+    throw new ApiError(422, 'AI response missing valid title field.');
+  }
+
+  const normCategory = (category || '').toString().toUpperCase().trim();
+  const normPriority  = (priority  || '').toString().toUpperCase().trim();
+
+  if (!VALID_CATEGORIES.includes(normCategory)) {
+    throw new ApiError(422, `AI returned unknown category: ${category}`);
+  }
+  if (!VALID_PRIORITIES.includes(normPriority)) {
+    throw new ApiError(422, `AI returned unknown priority: ${priority}`);
+  }
+
+  const score = Number.parseInt(confidence, 10);
+  const normConfidence = Number.isFinite(score) ? Math.min(100, Math.max(0, score)) : 70;
+
+  return {
+    title:      title.trim().slice(0, 100),
+    category:   normCategory,
+    priority:   normPriority,
+    refinedDescription: (refinedDescription || '').toString().trim().slice(0, 5000),
+    summary:    (summary   || '').toString().trim().slice(0, 1000),
+    reasoning:  (reasoning || '').toString().trim().slice(0, 1000),
+    confidence: normConfidence,
+  };
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Analyses a resident complaint using Groq LLM with model fallback.
+ *
+ * Tries models in MODELS array order. If one fails (network, rate-limit,
+ * model unavailable) it logs the failure and tries the next.
+ * Throws ApiError if all models fail or the API key is absent.
+ *
+ * @param {string} complaintText - Free-text complaint from the resident
+ * @returns {Promise<object>} { title, category, priority, summary, reasoning, confidence }
+ */
+async function analyzeComplaint(complaintText) {
+  return requestStructured('Analyse this complaint: ' + complaintText, SYSTEM_PROMPT, parseAndValidate);
+}
+
+// ─── Duplicate Detection Prompt ───────────────────────────────────────────────
+
+const DUPLICATE_DETECTION_PROMPT = `You are a duplicate complaint detector for a residential society maintenance system.
+
+Given a new complaint and a numbered list of existing open complaints, identify which are most similar to the new one.
+
+Return ONLY a JSON object in this exact format — no markdown, no preamble:
+{
+  "matches": [
+    {
+      "complaintId": "<exact id from list>",
+      "similarity": <integer 0-100>,
+      "reason": "<one concise sentence explaining the similarity>"
+    }
+  ]
+}
+
+Rules:
+- Include ONLY matches with similarity >= 30
+- Return at most 3 results, ordered by similarity descending (highest first)
+- If no matches score >= 30, return: {"matches": []}
+- complaintId MUST exactly match one of the IDs provided — never invent or modify IDs
+- Focus on semantic similarity: same problem type, location, or system affected
+- Examples:
+  "Water leaking from ceiling" vs "Water dripping from roof" → ~90%
+  "Broken lights in lobby" vs "Power outage on floor 2" → ~60%
+  "Garbage not collected" vs "Broken lift" → ~5%`;
+
+// ─── Duplicate Response Parser ────────────────────────────────────────────────
+
+/**
+ * Parses and validates the Groq duplicate detection response.
+ * Filters out invalid IDs, enforces similarity threshold, and enriches
+ * each match with the actual complaint data from the DB.
+ *
+ * @param {string}   rawContent        - Raw LLM content string
+ * @param {object[]} existingComplaints - DB complaint records
+ * @returns {object[]} Enriched, validated match array (max 3)
+ */
+function parseDuplicateResponse(rawContent, existingComplaints) {
+  let parsed;
+  try {
+    const cleaned = rawContent.replace(/```(?:json)?/gi, '').trim();
+    parsed = JSON.parse(cleaned);
+  } catch {
+    throw new ApiError(422, 'AI duplicate check returned an invalid response.');
+  }
+
+  if (!parsed || !Array.isArray(parsed.matches))
+    throw new ApiError(422, 'AI duplicate check returned an invalid response.');
+  const rawMatches = parsed.matches;
+  const seen = new Set();
+  const existingMap = new Map(existingComplaints.map((c) => [c.id, c]));
+
+  return rawMatches
+    .filter((m) => {
+      if (!m || !m.complaintId || !existingMap.has(m.complaintId) || seen.has(m.complaintId)) return false;
+      seen.add(m.complaintId);
+      const sim = parseInt(m.similarity, 10);
+      return !isNaN(sim) && sim >= 30;
+    })
+    .map((m) => {
+      const complaint = existingMap.get(m.complaintId);
+      return {
+        complaintId: m.complaintId,
+        similarity:  Math.min(100, Math.max(0, parseInt(m.similarity, 10))),
+        reason:      (m.reason || '').toString().trim(),
+        // DB-enriched fields for frontend display
+        title:       complaint.title,
+        category:    complaint.category,
+        status:      complaint.status,
+        createdAt:   complaint.createdAt,
+        priority:    complaint.priority,
+        residentId:  complaint.residentId,
+        description: complaint.description,
+      };
+    })
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, 3);
+}
+
+// ─── Public: Detect Duplicates ────────────────────────────────────────────────
+
+/**
+ * Compares a new complaint text against recent unresolved complaints using Groq.
+ *
+ * Workflow:
+ *   1. Fetch last 30 OPEN/IN_PROGRESS complaints from the last 60 days
+ *   2. Build a compact prompt with truncated descriptions (token-safe)
+ *   3. Call Groq with model fallback
+ *   4. Parse, validate, and enrich the response
+ *   5. Return top 3 matches with similarity >= 30
+ *
+ * Returns an empty array when:
+ *   - No existing unresolved complaints found
+ *   - AI returns no matches above the threshold
+ *   Provider failures throw a safe error; the frontend still allows normal submission.
+ *
+ * @param {string} newComplaintText - Combined title + description text
+ * @returns {Promise<object[]>} Enriched match array (max 3)
+ */
+async function detectDuplicates(newComplaintText, user) {
+  const apiKey = process.env.GROQ_API_KEY?.trim();
+  if (!apiKey) throw new ApiError(503, 'AI service is not configured.');
+
+  // ── Fetch recent unresolved complaints ────────────────────────────────────
+  const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+
+  const existing = await prisma.complaint.findMany({
+    where: {
+      ...(user?.role === 'RESIDENT' ? { residentId: user.id } : {}),
+      archivedAt:null,
+      deletedAt:null,
+      status:    { in: [STATUS.OPEN, STATUS.IN_PROGRESS] },
+      createdAt: { gte: sixtyDaysAgo },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 30,
+    select: {
+      id:        true,
+      title:     true,
+      description: true,
+      category:  true,
+      status:    true,
+      createdAt: true,
+      priority:  true,
+      residentId: true,
+    },
+  });
+
+  // Nothing to compare against — return immediately without calling Groq
+  if (existing.length === 0) return [];
+
+  // ── Build compact prompt payload ──────────────────────────────────────────
+  const complaintsList = existing
+    .map((c) => `${c.id}: "${c.title}" — "${c.description.slice(0, 150)}"`)
+    .join('\n');
+
+  const userMessage = [
+    `New complaint: "${newComplaintText.slice(0, 400)}"`,
+    '',
+    'Existing unresolved complaints to compare against:',
+    complaintsList,
+  ].join('\n');
+
+  return requestStructured(userMessage, DUPLICATE_DETECTION_PROMPT, raw => parseDuplicateResponse(raw, existing));
+}
+
+module.exports = { analyzeComplaint, detectDuplicates, parseAndValidate };

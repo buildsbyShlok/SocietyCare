@@ -1,0 +1,32 @@
+[
+  {
+    "file": "geist-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwSGFWfOw.woff2",
+    "family": "Geist"
+  },
+  {
+    "file": "geist-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/geist/v5/gyByhwUxId8gMEwcGFU.woff2",
+    "family": "Geist"
+  },
+  {
+    "file": "geist-mono-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/geistmono/v6/or3nQ6H-1_WfwkMZI_qYFrkdmgPn.woff2",
+    "family": "Geist Mono"
+  },
+  {
+    "file": "geist-mono-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/geistmono/v6/or3nQ6H-1_WfwkMZI_qYFrcdmg.woff2",
+    "family": "Geist Mono"
+  },
+  {
+    "file": "inter-latin-ext.woff2",
+    "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
+    "family": "Inter"
+  },
+  {
+    "file": "inter-latin.woff2",
+    "source": "https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
+    "family": "Inter"
+  }
+]

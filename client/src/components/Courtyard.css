@@ -1,0 +1,99 @@
+/* The model sits directly on the page: no viewer chrome or panel surface. */
+.society-model { position:relative; width:100%; margin:8px 0 24px; container-type:inline-size; }
+.model-viewport {
+  /* Continuous fit uses the whole section, without abrupt mobile scale steps. */
+  --scene-size:min(96cqw,1240px);
+  --scene-fit:1;
+  --camera-yaw:-22deg; --camera-pitch:-28deg;
+  height:calc(var(--scene-size) * .76);
+  perspective:5000px; display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); place-items:center;
+  touch-action:pan-y; cursor:grab; user-select:none; -webkit-user-select:none;
+}
+.model-viewport:active { cursor:grabbing; }
+.model-scale { width:520px; height:330px; transform:scale(var(--scene-fit)) translateY(-62px); transform-style:preserve-3d; }
+.model-camera { width:100%; height:100%; transform-style:preserve-3d; transform:rotateX(var(--camera-pitch)) rotateY(var(--camera-yaw)); transition:none; animation:none; }
+.model-orbit { position:relative; width:100%; height:100%; transform-style:preserve-3d; }
+/* A landscaped island with a continuous drive, footpaths and a marked recreation court. */
+.model-ground { position: absolute; width: 600px; height: 440px; left: -40px; top: 110px; transform: rotateX(90deg); background: #b7c5a0; border: 8px solid #d1d2c3; box-shadow: 0 24px 42px #15262940; }
+.model-road { position: absolute; inset: 24px; border: 37px solid #78858a; border-radius: 55px; box-shadow: 0 0 0 4px #e3dfcd, inset 0 0 0 4px #e3dfcd; }
+.model-road::after { content: ""; position: absolute; inset: -20px; border: 1px dashed #d7ddcf; border-radius: 36px; }
+.model-entry-road { position: absolute; bottom: -8px; left: calc(50% - 31px); width: 62px; height: 60px; background: #78858a; border-inline: 3px solid #e3dfcd; }
+.model-garden { position: absolute; width: 35px; height: 238px; top: 70px; background: #779965; border: 4px solid #a3b58b; border-radius: 20px; }
+.garden-west { left: 7px; }.garden-east { right: 7px; }
+.model-walking-path { position: absolute; top: 138px; left: 97px; right: 97px; height: 118px; border-bottom: 15px solid #e2d7bb; border-inline: 13px solid #e2d7bb; border-radius: 0 0 35px 35px; }
+.model-plaza { position: absolute; width: 105px; height: 70px; left: calc(50% - 52px); top: 255px; background: #d6ccaf; border: 6px solid #a2b68a; border-radius: 38%; }
+.model-parking { position: absolute; left: 84px; bottom: 53px; width: 141px; height: 53px; background: repeating-linear-gradient(90deg, #7c898e 0 44px, #dfe1d2 44px 46px); border-bottom: 2px solid #dfe1d2; }
+.model-court { position: absolute; right: 102px; bottom: 60px; width: 90px; height: 100px; background: #b88b69; border: 3px solid #ece0c4; outline: 7px solid #7d9e86; }
+.model-court::after { content: ""; position: absolute; inset: 0 0 50%; border-bottom: 1px solid #ece0c4; }
+.model-court i { position: absolute; width: 27px; height: 27px; border: 1px solid #ece0c4; border-radius: 50%; top: calc(50% - 13px); left: calc(50% - 13px); }
+.model-court b { position: absolute; bottom: 0; left: 25px; width: 34px; height: 22px; border: 1px solid #ece0c4; }
+/* Each tower is a four-sided mesh of CSS planes with projecting balcony slabs. */
+.model-building { position: absolute; width: 84px; height: var(--tower-height); bottom: 0; left: 218px; transform-style: preserve-3d; transform: translate3d(var(--tower-x),0,var(--tower-z)); }
+.model-face { position: absolute; width: 84px; height: 100%; background: var(--model-wall); backface-visibility: hidden; border: 3px solid var(--model-roof); box-shadow: inset 0 -25px var(--model-side); transform-style: preserve-3d; }
+.model-front { transform: translateZ(42px); }.model-back { transform: rotateY(180deg) translateZ(42px); }
+.model-left { transform: rotateY(-90deg) translateZ(42px); background: var(--model-side); }
+.model-right { transform: rotateY(90deg) translateZ(42px); background: var(--model-side); }
+.model-windows { display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(8,1fr); gap: 8px 8px; padding: 9px 9px 30px; height: 100%; }
+.model-windows i { background: #3b5361; border-top: 2px solid #263d4a; border-bottom: 2px solid #e8e5d8; }
+.model-windows i:nth-child(7n) { background: #c2c8a8; }
+.model-balcony { position: absolute; left: -3px; right: -3px; height: 7px; background: var(--model-roof); border-top: 2px solid #ffffff70; border-bottom: 2px solid var(--model-side); transform: translateZ(5px); }
+.model-balcony::after { content: ""; position: absolute; width: 100%; height: 8px; background: var(--model-roof); top: -5px; transform: rotateX(90deg) translateY(-4px); }
+.model-lobby { position: absolute; width: 22px; height: 23px; bottom: 0; left: 28px; background: #395460; border: 2px solid var(--model-roof); }
+.model-roof { position: absolute; top: -42px; width: 84px; height: 84px; background: var(--model-roof); border: 5px solid var(--model-wall); transform: rotateX(90deg); backface-visibility: hidden; }
+.model-solar { position: absolute; inset: 14px 11px; background: repeating-linear-gradient(90deg,#415e73 0 10px,#94acb7 10px 11px); border: 3px solid var(--model-side); }
+.tower-shadow { position: absolute; width: 110px; height: 140px; bottom: -71px; left: 8px; transform: rotateX(90deg); background: #263e392b; filter: blur(9px); }
+/* Reusable small cuboids: scenery stays in the same 3D world as the towers. */
+.model-prop { position: absolute; width: 0; height: 0; left: 50%; bottom: 0; transform-style: preserve-3d; transform: translate3d(var(--x),0,var(--z)); }
+.model-solid { position: absolute; width: var(--w); height: var(--h); left: calc(var(--w) / -2); transform-style: preserve-3d; }
+.model-solid > i { display: block; position: absolute; background: var(--solid-color); backface-visibility: hidden; }
+.solid-front,.solid-back { width: var(--w); height: var(--h); }
+.solid-front { transform: translateZ(calc(var(--d) / 2)); }
+.solid-back { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); }
+.solid-left,.solid-right { width: var(--d); height: var(--h); left: calc((var(--w) - var(--d)) / 2); background: color-mix(in srgb, var(--solid-color) 78%, #203a45) !important; }
+.solid-left { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); }
+.solid-right { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); }
+.solid-top { width: var(--w); height: var(--d); top: calc(var(--d) / -2); transform: rotateX(90deg); background: color-mix(in srgb,var(--solid-color) 85%,white) !important; }
+.prop-shadow { position: absolute; width: 40px; height: 48px; left: -16px; bottom: -24px; background: #23372d30; border-radius: 50%; transform: rotateX(90deg); filter: blur(4px); }
+.tree-canopy { position: absolute; width: 34px; height: 48px; bottom: 18px; left: -17px; transform-origin: bottom center; transform-style: preserve-3d; animation: tree-sway 6s ease-in-out infinite alternate; }
+.tree-canopy i { position: absolute; inset: 0; border-radius: 45% 55% 40% 40%; background: #668756; border-top: 5px solid #92ad72; }
+.tree-canopy i:nth-child(2) { background: #78985e; }.tree-canopy i:nth-child(3) { background: #527b52; }
+.car-wheel { position: absolute; width: 4px; height: 10px; bottom: 1px; background: #314046; box-shadow: 0 -24px #314046; transform: rotateX(90deg) translateY(12px); }
+.wheel-left { left: -12px; }.wheel-right { right: -12px; }
+.security-window { position: absolute; width: 24px; height: 14px; bottom: 14px; left: -12px; background: #567887; border: 2px solid #e3e0d1; transform: translateZ(15.2px); }
+.gate-barrier { position: absolute; width: 74px; height: 4px; left: -37px; bottom: 17px; background: repeating-linear-gradient(90deg,#e9dfc9 0 9px,#bb745b 9px 18px); }
+.court-backboard { position: absolute; width: 22px; height: 14px; left: -11px; bottom: 24px; background: #e9e4d6; border: 1px solid #8a9893; transform: translateZ(2px); }
+.court-hoop { position: absolute; width: 10px; height: 10px; bottom: 19px; left: -5px; border: 2px solid #bd7659; border-radius: 50%; transform: rotateX(90deg) translateY(8px); }
+.model-lamp > span { position: absolute; width: 11px; height: 6px; left: -5px; bottom: 44px; background: #e9ddb0; border: 1px solid #97a49d; animation: lamp-warmth 8s ease-in-out infinite alternate; }
+
+.model-rooftop { position:absolute; top:0; left:50%; transform-style:preserve-3d; transform:translateZ(-18px); }
+.model-windows i { box-shadow:inset -3px 0 #ffffff18; position:relative; }
+.model-windows i::after { content:""; position:absolute; left:48%; top:0; bottom:0; width:1px; background:#b5c6cc70; }
+.model-lobby::after { content:""; position:absolute; left:50%; top:0; bottom:0; border-left:1px solid #c9d7d6; }
+.model-ground { border-radius:16px; background:#b8c99e; box-shadow:0 20px 32px #172b3238; }
+.model-face { box-shadow:inset 0 -25px var(--model-side), inset 5px 0 #ffffff18; }
+.model-front { background:color-mix(in srgb,var(--model-wall) 94%,white); }
+.model-back { background:color-mix(in srgb,var(--model-wall) 88%,#52646d); }
+@keyframes tree-sway { from { transform:rotateZ(-2deg); } to { transform:rotateZ(2deg); } }
+@keyframes lamp-warmth { from { opacity:.75; } to { opacity:1; } }
+.model-moving-vehicle { position:absolute; left:50%; bottom:0; transform-style:preserve-3d; animation:neighbourhood-drive 42s linear infinite; }
+@keyframes neighbourhood-drive {
+  0% {transform:translate3d(-215px,0,155px) rotateY(-90deg);}
+  3% {transform:translate3d(-240px,0,130px) rotateY(-180deg);}
+  22% {transform:translate3d(-240px,0,-145px) rotateY(-180deg);}
+  25% {transform:translate3d(-215px,0,-170px) rotateY(-270deg);}
+  47% {transform:translate3d(215px,0,-170px) rotateY(-270deg);}
+  50% {transform:translate3d(240px,0,-145px) rotateY(-360deg);}
+  69% {transform:translate3d(240px,0,130px) rotateY(-360deg);}
+  72% {transform:translate3d(215px,0,155px) rotateY(-450deg);}
+  100% {transform:translate3d(-215px,0,155px) rotateY(-450deg);}
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .model-moving-vehicle,.tree-canopy,.model-lamp > span { animation:none; }
+}
+
+/* The public landing page shares the same unframed, full-width model. */
+.estate.estate-scene { display:block; border:0; border-radius:0; background:none; overflow:visible; min-height:0; }
+.estate-scene .estate-copy { padding:24px 0 0; }
+.estate-scene .society-model { margin-top:0; }
+

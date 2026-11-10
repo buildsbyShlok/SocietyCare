@@ -1,0 +1,99 @@
+/* ============================================================
+   CreateNotice Page — Component Styles (Phase 4B Design System)
+   ============================================================ */
+
+.create-notice-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.create-notice-card {
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--space-6);
+}
+
+/* ── Pinned Priority Toggle Card ─────────────────────────────────────────── */
+
+.pin-toggle-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 14px var(--space-4);
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-5);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  outline: none;
+}
+
+.pin-toggle-card:hover,
+.pin-toggle-card:focus-visible {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-surface);
+}
+
+.pin-toggle-card.is-pinned {
+  border-color: var(--color-accent-border);
+  background-color: var(--color-accent-light);
+  box-shadow: 0 0 12px var(--color-accent-light);
+}
+
+.pin-toggle-checkbox {
+  padding-top: 2px;
+}
+
+.pin-toggle-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+}
+
+.pin-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.pin-toggle-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pin-toggle-icon {
+  color: var(--color-accent);
+}
+
+.pin-toggle-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.pin-toggle-desc {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ── Form Actions Row ────────────────────────────────────────────────────── */
+
+.notice-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}

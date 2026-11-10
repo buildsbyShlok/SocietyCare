@@ -1,0 +1,27 @@
+-- Remove account identity while retaining financial, community and audit records.
+BEGIN;
+ALTER TABLE "complaints" ALTER COLUMN "residentId" DROP NOT NULL;
+ALTER TABLE "complaints" DROP CONSTRAINT "complaints_residentId_fkey";
+ALTER TABLE "complaints" ADD CONSTRAINT "complaints_residentId_fkey" FOREIGN KEY ("residentId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "complaint_history" ALTER COLUMN "changedById" DROP NOT NULL;
+ALTER TABLE "complaint_history" DROP CONSTRAINT "complaint_history_changedById_fkey";
+ALTER TABLE "complaint_history" ADD CONSTRAINT "complaint_history_changedById_fkey" FOREIGN KEY ("changedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "notices" ALTER COLUMN "authorId" DROP NOT NULL;
+ALTER TABLE "notices" DROP CONSTRAINT "notices_authorId_fkey";
+ALTER TABLE "notices" ADD CONSTRAINT "notices_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Bill" ALTER COLUMN "residentId" DROP NOT NULL;
+ALTER TABLE "Bill" DROP CONSTRAINT "Bill_residentId_fkey";
+ALTER TABLE "Bill" ADD CONSTRAINT "Bill_residentId_fkey" FOREIGN KEY ("residentId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Payment" ALTER COLUMN "verifiedById" DROP NOT NULL;
+ALTER TABLE "Payment" DROP CONSTRAINT "Payment_verifiedById_fkey";
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_verifiedById_fkey" FOREIGN KEY ("verifiedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "CommunityMessage" ALTER COLUMN "senderId" DROP NOT NULL;
+ALTER TABLE "CommunityMessage" DROP CONSTRAINT "CommunityMessage_senderId_fkey";
+ALTER TABLE "CommunityMessage" ADD CONSTRAINT "CommunityMessage_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "MessageReport" ALTER COLUMN "reporterId" DROP NOT NULL;
+ALTER TABLE "MessageReport" DROP CONSTRAINT "MessageReport_reporterId_fkey";
+ALTER TABLE "MessageReport" ADD CONSTRAINT "MessageReport_reporterId_fkey" FOREIGN KEY ("reporterId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Event" ALTER COLUMN "creatorId" DROP NOT NULL;
+ALTER TABLE "Event" DROP CONSTRAINT "Event_creatorId_fkey";
+ALTER TABLE "Event" ADD CONSTRAINT "Event_creatorId_fkey" FOREIGN KEY ("creatorId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+COMMIT;
