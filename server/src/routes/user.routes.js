@@ -18,6 +18,8 @@ router.patch('/profile', uploadAvatar.single('avatar'), updateProfile);
 router.get('/:id/record', endpoint(req => profileRecord(req.params.id, req.user)));
 
 // Admin-only routes
+router.patch('/:id/enrollment', authorize(ROLES.ADMIN), endpoint(req =>
+  require('../services/user.service').approveEnrollment(req.params.id, req.user.id)));
 router.get('/', authorize(ROLES.ADMIN), list);
 router.patch('/:id/role', authorize(ROLES.ADMIN), updateRole);
 router.delete('/:id', authorize(ROLES.ADMIN), deleteUser);

@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import { Load, Section, Row, money, useResource } from "./Workspace";
+import { Load, Section, Row, useResource } from "./Workspace";
 import { formatDate } from "../utils/helpers";
 export function ResidentRecord({ id, details = false }) {
   const source = useResource("/users/" + encodeURIComponent(id) + "/record");
@@ -57,31 +57,6 @@ export function ResidentRecord({ id, details = false }) {
               ))
             ) : (
               <p>No complaints recorded.</p>
-            )}
-          </Section>
-          <Section title="Maintenance payment history">
-            {u.bills?.length ? (
-              <div className="profile-payment-list">
-                {u.bills.map((b) => (
-                  <Link
-                    key={b.id}
-                    to={"/billing/" + b.id}
-                    className="profile-payment"
-                  >
-                    <div>
-                      <strong>{b.month}</strong>
-                      <span>Verified {formatDate(b.payment.paidAt)}</span>
-                    </div>
-                    <div>
-                      <span>Receipt {b.payment.id}</span>
-                      <small>Reference {b.payment.reference}</small>
-                    </div>
-                    <strong>{money(b.amount)}</strong>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p>No verified maintenance payments recorded.</p>
             )}
           </Section>
         </>

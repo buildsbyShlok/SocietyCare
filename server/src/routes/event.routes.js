@@ -18,6 +18,7 @@ const select = {
   creator: { select: { name: true, flatNumber: true, tower: true } },
 };
 router.use(require("../middleware/authenticate"));
+router.use(require('../middleware/community-society'));
 function eventData(body) {
   const startsAt = field(body.startsAt, "event date and time", 40);
   if (

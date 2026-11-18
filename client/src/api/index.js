@@ -13,7 +13,7 @@
  * they do not access localStorage directly.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 /**
  * @param {string} method - HTTP method
@@ -130,6 +130,7 @@ export const users = {
     return request('GET', `/users${query ? `?${query}` : ''}`, null, token);
   },
   delete: (id, token) => request('DELETE', '/users/' + id, null, token),
+  approveEnrollment: (id, token) => request('PATCH', `/users/${id}/enrollment`, {}, token),
   updateRole: (id, role, token) => request('PATCH', `/users/${id}/role`, { role }, token),
   updateProfile: (formData, token) => request('PATCH', '/users/profile', formData, token),
 };

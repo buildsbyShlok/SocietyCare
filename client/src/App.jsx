@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import PageBoundary from "./components/PageBoundary";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ROLES } from "./utils/constants";
@@ -11,6 +11,10 @@ const ResidentDetails = lazy(() =>
   })),
 );
 const Events = lazy(() => import("./pages/Events"));
+const Assets = lazy(() => import("./pages/Assets"));
+const QRReport = lazy(() => import("./pages/QRReport"));
+const AssetDetail = lazy(() => import("./pages/Assets").then(m => ({ default: m.AssetDetail })));
+const AssetEditor = lazy(() => import("./pages/Assets").then(m => ({ default: m.AssetEditor })));
 const EventDetail = lazy(() =>
   import("./pages/Events").then((m) => ({ default: m.EventDetail })),
 );
@@ -18,10 +22,6 @@ const EventEditor = lazy(() =>
   import("./pages/Events").then((m) => ({ default: m.EventEditor })),
 );
 const Community = lazy(() => import("./pages/Community"));
-const InvoiceDetail = lazy(() =>
-  import("./pages/Billing").then((m) => ({ default: m.InvoiceDetail })),
-);
-const Billing = lazy(() => import("./pages/Billing"));
 const Admin = lazy(() => import("./pages/Admin"));
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
@@ -35,6 +35,11 @@ const NoticeDetail = lazy(() => import("./pages/NoticeDetail"));
 const CreateNotice = lazy(() => import("./pages/CreateNotice"));
 const Settings = lazy(() => import("./pages/Settings"));
 const UserManagement = lazy(() => import("./pages/UserManagement"));
+
+function DashboardDestination() {
+  const { user } = useAuth();
+  return user?.role === ROLES.RESIDENT ? <Navigate to="/complaints" replace /> : <Dashboard />;
+}
 
 export default function App() {
   const location = useLocation();
@@ -52,6 +57,9 @@ export default function App() {
             {/* Public routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/report/:qrToken" element={<QRReport />} />
+            {/* Keep Phase 1 printed labels working without changing their tokens. */}
+            <Route path="/report/asset/:qrToken" element={<QRReport />} />
 
             {/* Authenticated routes — all roles */}
             <Route element={<ProtectedRoute />}>
@@ -61,9 +69,7 @@ export default function App() {
               <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/events/:id/edit" element={<EventEditor />} />
               <Route path="/community" element={<Community />} />
-              <Route path="/billing" element={<Billing />} />
-              <Route path="/billing/:id" element={<InvoiceDetail />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<DashboardDestination />} />
               <Route path="/complaints" element={<Complaints />} />
               <Route path="/complaints/:id" element={<ComplaintDetail />} />
               <Route path="/notices" element={<Notices />} />
@@ -78,6 +84,10 @@ export default function App() {
 
             {/* Authenticated routes — admin only */}
             <Route element={<ProtectedRoute requiredRole={ROLES.ADMIN} />}>
+              <Route path="/assets" element={<Assets />} />
+              <Route path="/assets/new" element={<AssetEditor />} />
+              <Route path="/assets/:id" element={<AssetDetail />} />
+              <Route path="/assets/:id/edit" element={<AssetEditor />} />
               <Route path="/notices/new" element={<CreateNotice />} />
               <Route path="/admin" element={<Admin />} />
               <Route

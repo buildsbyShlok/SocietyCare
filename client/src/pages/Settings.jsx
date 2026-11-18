@@ -110,7 +110,7 @@ export default function Settings() {
         <div className="page-header-title">
           <h1>My Profile</h1>
           <p className="page-header-subtitle">
-            Manage your personal profile and preferences
+            Manage your personal profile. Shared society information is managed by an administrator.
           </p>
         </div>
       </header>

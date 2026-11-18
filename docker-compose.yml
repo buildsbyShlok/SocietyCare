@@ -51,6 +51,8 @@ services:
     build:
       context: ./client
       args:
+        VITE_BUILD_MODE: local-demo
+        VITE_PUBLIC_FRONTEND_URL: ${VITE_PUBLIC_FRONTEND_URL:-}
         VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
     restart: unless-stopped
     ports:

@@ -16,7 +16,7 @@ Docker build context is **server/**: `docker build -t societycare-api ./server`.
 
 ## Frontend
 
-From client: `npm ci`, set the public-only VITE_API_URL including /api, then `npm run build`. Host client/dist as static files. Vercel uses client as its project root and the existing vercel.json SPA rewrite. The Docker client uses nginx and includes SPA fallback routing. Rebuild when VITE_API_URL changes. Provider keys must never use a VITE_ prefix.
+From client, run `npm ci`. Set `VITE_PUBLIC_FRONTEND_URL` to the exact public HTTPS frontend origin and `VITE_API_URL` to the HTTPS API URL ending in /api (or /api with a same-origin proxy). Then run `npm run build`. Set backend `CLIENT_URL` to the same frontend origin. Rebuild when either public value changes. A changed host requires reprinting old physical labels or maintaining the old host redirect. Existing asset tokens stay valid. Host client/dist as static files. Vercel uses client as its project root and the existing vercel.json SPA rewrite. The Docker client uses nginx and includes SPA fallback routing. Rebuild when VITE_API_URL changes. Provider keys must never use a VITE_ prefix.
 
 ## Local Docker demonstration
 

@@ -7,6 +7,7 @@ Residential society maintenance management with resident and admin portals. This
 - `client`: React 19, Vite 6, React Router 7, CSS, Framer Motion and Lucide React. Semantic light/dark themes with Geist headings, Inter body text and Geist Mono identifiers; fonts are served locally with their licenses.
 - `server`: Node.js, Express 4, Prisma 6 and PostgreSQL. Routes → middleware → controllers → services → Prisma.
 - Authentication: bcrypt passwords and Bearer JWTs. Every protected request reloads the user's current database identity/role. Demotion takes effect on the next request; deleted users receive 401. Disabled users cannot sign in or reuse an existing token.
+- Enrollment: public registration creates a disabled resident request. A same-society administrator verifies the request and approves it in the Resident Directory. Existing account access is preserved.
 - Residents: register/login, profile settings, submit and filter their own complaints, view details/history and read notices.
 - Admins: dashboard statistics and overdue monitoring, complaint status/priority updates, remarks/history, notice creation/editing/pinning/deletion, searchable directory and role management.
 - Complaint states: `OPEN → IN_PROGRESS → RESOLVED`, or `OPEN → RESOLVED`. `UNRESOLVED` is a list filter for open/in-progress complaints, not a stored status. Remarks are optional in the current implementation.
@@ -15,13 +16,11 @@ Residential society maintenance management with resident and admin portals. This
 
 ## Society workspace
 
-Home opens at `/`. Admin Management → Society information controls its name, address, flat capacity, description and upcoming maintenance. Registered flats count distinct tower/unit pairs on active resident accounts. Physical occupancy is not inferred.
-
-Maintenance & Billing is a manual INR ledger. Choose a responsible resident, month, amount and due date to generate an invoice. Open an invoice’s dedicated detail page to see its breakdown or, as an admin, verify a full external payment by reference. Each verified payment produces one receipt. Changing the resident's profile leaves the original invoice owner and unit intact.
+Home opens at `/`. Admin Management → Society information controls its name, address, flat capacity and description. Registered flats count distinct tower/unit pairs on active resident accounts. Physical occupancy is not inferred.
 
 Events at /events are published by residents or admins, with creator/admin editing and soft removal. Event times are entered/displayed in the browser’s local timezone and stored in UTC. Home shows upcoming events. Announcements have categories and dedicated detail pages.
 
-Community supports text, images (JPEG/PNG/WebP, 5 MB), replies, avatars and unit labels. Messages refresh every seven seconds. Message options include reporting. Admins review reported messages and can remove them from the feed. Profiles display complaint history to the owner and admins; private profiles show verified payment history with links to invoice details; billing management stays in Maintenance & Billing. Residents can remove their own complaints with confirmation and an audit reason; admins can archive permitted complaints and review them from Admin Management. Archival preserves the record and history.
+Community supports text, images (JPEG/PNG/WebP, 5 MB), replies, avatars and unit labels. Messages refresh every seven seconds. Message options include reporting. Admins review reported messages and can remove them from the feed. Profiles display complaint history to the owner and admins. Residents can remove their own complaints with confirmation and an audit reason; admins can archive permitted complaints through the dedicated complaint area. Archival preserves the record and history.
 
 ## Windows local setup (PowerShell)
 
@@ -90,6 +89,7 @@ npx prisma migrate deploy
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Optional; all three required for complaint images, avatars, event posters and chat attachments |
 | `GROQ_API_KEY` | Optional; required for AI analysis and duplicate checks |
 | `RESEND_API_KEY`, `FROM_EMAIL` | Optional; both required for email; sender must be verified in Resend |
+| `VITE_PUBLIC_FRONTEND_URL` | Public HTTPS frontend origin for production QR labels. Set before building. |
 | `VITE_API_URL` | Client only; API base URL including `/api` |
 
 Leave unused integration values empty. Missing Cloudinary/Groq configuration returns an actionable 503 when requested; text-only complaints still work. Email is best effort: absent configuration skips delivery with a server warning, and failures are logged without rolling back complaint/notice changes. No production flow uses mock data.
@@ -152,16 +152,28 @@ MIT. See `LICENSE`.
 
 ## Platform UI verification
 
-From `client`, run `npm run test:ui`, `npm run test:platform` and `npm run build`. The first checks component rendering with isolated fixtures; the second checks semantic color contrast and local font files. Neither replaces browser interaction, responsive-layout or runtime performance testing. Authenticated pages are loaded lazily, with a recovery screen for rendering/chunk failures. Profile payment history uses the existing self-or-admin API; no schema migration was needed for the platform refresh.
+From `client`, run `npm run test:ui`, `npm run test:platform` and `npm run build`. The first checks component rendering with isolated fixtures; the second checks semantic color contrast and local font files. Neither replaces browser interaction, responsive-layout or runtime performance testing. Authenticated pages are loaded lazily, with a recovery screen for rendering/chunk failures.
 
 Local font provenance and OFL license files are in `client/public/fonts`. Sources: [Geist](https://github.com/vercel/geist-font) and [Inter](https://github.com/rsms/inter), distributed through Google Fonts.
 
 ## Permanent account deletion
 Administrators can permanently delete another account from Resident Directory after an identifying confirmation. Self-deletion and removal of the final active admin are blocked; authorization always uses the current database role.
 
-Migration `20261107140000_user_delete_preserve_records` makes eight account relationships nullable with `ON DELETE SET NULL`. Deletion removes the user row (login, password hash and profile). Complaints, status history, published notices/events/messages, reports, invoices and payments remain, with deleted-account fallbacks. Invoice unit/period/amount/reference and historical content remain for continuity; this is not a purge of all authored content or externally stored media. Existing JWTs cease to authenticate. Apply migrations with `npx prisma migrate deploy` from `server` and regenerate the Prisma client before starting the updated server.
+Migration `20261107140000_user_delete_preserve_records` makes historical account relationships nullable with `ON DELETE SET NULL`. Deletion removes the user row (login, password hash and profile). Complaints, status history, published notices/events/messages and reports remain with deleted-account fallbacks. Legacy invoice/payment tables are intentionally retained without UI or API access so existing database records are not deleted. This is not a purge of authored content or externally stored media. Existing JWTs cease to authenticate. Apply migrations with `npx prisma migrate deploy` from `server` and regenerate the Prisma client before starting the updated server.
 
-## Maintenance
+## QR asset fault reporting — Phases 1–3
+
+Admins can open **Asset Management** to register equipment, edit its details, activate/deactivate it, and download or print its QR label. An unused asset can be permanently removed after confirmation; an asset with linked complaints can only be deactivated so history stays intact. Apply the additive migration with `npx prisma migrate deploy` and run `npx prisma generate` from `server` before starting the updated backend. No seed/reset is required.
+
+QR labels now contain `<frontend-origin>/report/<qrToken>`. Previously printed `/report/asset/<qrToken>` links remain supported. The public page shows only active equipment identification. Sign-in/register links preserve the complete QR destination; authenticated residents submit through the existing complaint API with optional photo uploads. Admins cannot submit resident reports. Generate installation labels from the deployed website, not localhost. Existing manual complaints still work without an asset. API details are in [the API reference](docs/api-reference.md).
+
+Migration `20261114090000_qr_reporting` adds a MANUAL/QR complaint source and database-backed User/Asset society relationships. Existing records belong to this single-society installation (Society 1). Registration assigns that society server-side via the database default; body-supplied membership is not accepted as authority. QR reporting rejects mismatched membership, and rechecks role, enabled status and asset availability inside the insert transaction after upload.
+
+Phase 3 adds `20261114100000_complaint_society_scope`, which records every complaint's society independently of a nullable resident or asset link. Admin complaint lists, details, status changes, asset histories and dashboard asset metrics use that scope. The board supports QR/manual source and asset filters; linked assets display their name/code without exposing QR tokens. This preserves the existing single-society operating model while enforcing society boundaries for the QR asset reporting workflows.
+
+`npm test` and `npm run test:database` in `server` cover validation, duplicate codes, role enforcement, token stability, activation, edits and complaint compatibility. The database check rolls back its fixtures. The client uses [qrcode](https://github.com/soldair/node-qrcode) for local QR generation; QR data is not sent to an external generator.
+
+## Runtime maintenance
 
 Keep server secrets in ignored environment files; .dockerignore also excludes them from images. Node 24 LTS is the supported deployment runtime. Backend source runs directly without a compilation step; Prisma Client generation is its required preparation. The Prisma CLI/client stay on matching 6.19.3 versions; the scoped deepmerge-ts override fixes its transitive advisory and is covered by Prisma validation/generation and database checks. Resend 6 uses the existing email API.
 

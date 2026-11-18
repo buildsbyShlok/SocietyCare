@@ -1,5 +1,7 @@
 import Metric from "../components/Metric";
-import { ClipboardList, CircleDot, Clock3, CircleCheck } from "lucide-react";
+import { ClipboardList, CircleDot, Clock3, CircleCheck, Box, PauseCircle, QrCode } from "lucide-react";
+import '../components/AssetComplaints.css';
+import { formatDate } from '../utils/helpers';
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useResource, Load, Row, Section } from "../components/Workspace";
@@ -58,6 +60,19 @@ export default function Dashboard() {
                 in progress
               </small>
             )}
+            {user.role === 'ADMIN' && s.assets && <section className="asset-statistics" aria-labelledby="asset-statistics-heading">
+              <h2 id="asset-statistics-heading">Equipment & reporting</h2>
+              <p className="ws-muted">Complaint counts exclude archived and removed records. Open means awaiting work.</p>
+              <div className="metric-grid">
+                <Metric label="Active assets" value={s.assets.active} icon={Box} note="Equipment in service" />
+                <Metric label="Inactive assets" value={s.assets.inactive} icon={PauseCircle} note="Reporting unavailable" />
+                <Metric label="QR complaints" value={s.assets.qrComplaints} icon={QrCode} note="Submitted from equipment labels" />
+                <Metric label="Open asset complaints" value={s.assets.openComplaints} icon={CircleDot} tone="open" note="Linked reports awaiting work" />
+              </div>
+              <Section title="Most reported equipment" action={<Link to="/assets">Asset Management</Link>}>
+                {s.assets.mostReported.length ? s.assets.mostReported.map(asset => <Row key={asset.id} to={'/assets/' + asset.id} title={asset.name} detail={asset.assetCode} meta={asset.complaintCount + (asset.complaintCount === 1 ? ' complaint' : ' complaints')} />) : <p className="ws-muted">No asset-related complaints yet.</p>}
+              </Section>
+            </section>}
           </>
         )}
       </Load>
@@ -74,6 +89,7 @@ export default function Dashboard() {
                     key={c.id}
                     to={"/complaints/" + c.id}
                     title={c.title}
+                    detail={user.role === 'ADMIN' ? [c.resident?.name || 'Deleted resident', formatDate(c.createdAt), c.source === 'QR' ? 'QR' : 'Manual', c.asset ? c.asset.name + ' · ' + c.asset.assetCode : 'Not linked to an asset'].join(' · ') : undefined}
                     meta={STATUS_LABELS[c.status]}
                   />
                 ))

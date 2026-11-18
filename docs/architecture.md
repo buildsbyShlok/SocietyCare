@@ -16,9 +16,9 @@ SocietyCare is one React 19 / Vite SPA and one Express API, backed by PostgreSQL
 
 ## Request and data boundaries
 
-Protected requests verify an HS256 JWT, then reload the active database identity. Role changes, disabled accounts and permanent deletion therefore take effect on the next request. Resident complaint/profile/billing access is ownership-scoped. Duplicate analysis uses complaints the requesting role may access.
+Protected requests verify an HS256 JWT, then reload the active database identity. Role changes, disabled accounts and permanent deletion therefore take effect on the next request. Resident complaint and profile access is ownership-scoped. Duplicate analysis uses complaints the requesting role may access.
 
-Complaint status changes and history are transactional. Archive and deletion preserve complaint data. Permanent user deletion sets nullable foreign keys to null, preserving authored content, invoices and audit history. Role/deletion operations serialize the final-admin check with a PostgreSQL advisory lock.
+Complaint status changes and history are transactional. Archive and deletion preserve complaint data. Permanent user deletion sets nullable foreign keys to null, preserving authored content and audit history. Legacy invoice/payment rows remain in the database but are deliberately not exposed by current product code. Role/deletion operations serialize the final-admin check with a PostgreSQL advisory lock.
 
 Uploads use Multer memory storage, validate content/type/size, and stream to Cloudinary with a deadline. PostgreSQL stores HTTPS URLs and public IDs. Groq is optional, returns validated suggestions, and cannot prevent manual complaint submission. Resend email is best effort and sent individually.
 

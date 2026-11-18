@@ -49,7 +49,7 @@ async function createNotice(data, authorId) {
   // If the notice is marked as important (pinned) on creation, notify residents
   if (shouldBePinned) {
     prisma.user.findMany({
-      where: { role: ROLES.RESIDENT, disabled: false },
+      where: { societyId: 1, role: ROLES.RESIDENT, disabled: false },
       select: { name: true, email: true },
     }).then((residents) => {
       sendNoticeEmail(residents, notice).catch((err) => {
@@ -150,7 +150,7 @@ async function togglePin(id) {
   // If the notice is newly pinned, send email to all residents
   if (willBePinned) {
     prisma.user.findMany({
-      where: { role: ROLES.RESIDENT, disabled: false },
+      where: { societyId: 1, role: ROLES.RESIDENT, disabled: false },
       select: { name: true, email: true },
     }).then((residents) => {
       sendNoticeEmail(residents, updated).catch((err) => {

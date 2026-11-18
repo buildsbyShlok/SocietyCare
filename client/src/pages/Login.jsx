@@ -1,6 +1,7 @@
 import { Brand } from '../components/Workspace';
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { safeReportReturn, reportAuthPath } from '../utils/report-return';
 import { motion } from 'framer-motion';
 import { Building2, ArrowRight } from 'lucide-react';
 import { auth as authApi } from '../api/index';
@@ -41,6 +42,8 @@ function validate(email, password) {
 export default function Login() {
   const { user, loading: authLoading, login: setAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeReportReturn(new URLSearchParams(location.search).get('returnTo'));
 
   const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
@@ -61,7 +64,7 @@ export default function Login() {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -78,7 +81,7 @@ export default function Login() {
     try {
       const data = await authApi.login({ email, password });
       setAuth(data.token, data.user);
-      navigate('/', { replace: true });
+      navigate(returnTo, { replace: true });
     } catch (err) {
       setApiError(err.message || 'Login failed. Please try again.');
     } finally {
@@ -178,7 +181,7 @@ export default function Login() {
         <hr className="auth-divider" />
         <p className="auth-footer">
           Don&apos;t have an account?{' '}
-          <Link to="/register">Create one</Link>
+          <Link to={reportAuthPath('/register', returnTo)}>Create one</Link>
         </p>
 
       </motion.div>

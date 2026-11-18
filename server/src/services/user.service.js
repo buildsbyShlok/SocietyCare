@@ -1,4 +1,5 @@
 const { uploadImage } = require('./image.service');
+const { societyScope } = require('../utils/society-scope');
 const prisma = require('../config/db');
 const ApiError = require('../utils/ApiError');
 const { ROLES } = require('../utils/constants');
@@ -10,8 +11,8 @@ const { ROLES } = require('../utils/constants');
  * @param {string} [params.search]
  * @returns {Promise<object[]>}
  */
-async function listUsers({ search }) {
-  const where = {};
+async function listUsers({ search }, actor) {
+  const where = societyScope(actor);
 
   if (search) {
     const cleanSearch = require('../utils/workspace').field(search, 'search', 100);
@@ -31,6 +32,7 @@ async function listUsers({ search }) {
       email: true,
       tower: true,
       disabled: true,
+      enrollmentPending: true,
       role: true,
       flatNumber: true,
       phone: true,
@@ -55,18 +57,26 @@ async function changeAccount(targetUserId, currentUserId, change) {
   return prisma.$transaction(async tx=>{
     // Serialize role changes and deletions across API instances; reload the actor after the lock.
     await tx.$queryRaw`SELECT 1 AS locked FROM pg_advisory_xact_lock(4839017)`;
-    const actor=await tx.user.findUnique({where:{id:currentUserId},select:{id:true,role:true,disabled:true}});
+    const actor=await tx.user.findUnique({where:{id:currentUserId},select:{id:true,role:true,disabled:true,societyId:true}});
     if(!actor || actor.disabled || actor.role!==ROLES.ADMIN) throw new ApiError(403,'An active administrator is required.');
-    const target=await tx.user.findUnique({where:{id:targetUserId},select:{id:true,role:true,disabled:true}});
-    if(!target) throw new ApiError(404,'User not found.');
+    const target=await tx.user.findUnique({where:{id:targetUserId},select:{id:true,role:true,disabled:true,societyId:true}});
+    if(!target || target.societyId !== societyScope(actor).societyId) throw new ApiError(404,'User not found.');
+    if (change.approve) {
+      const result = await tx.user.updateMany({
+        where: { id: targetUserId, ...societyScope(actor), role: ROLES.RESIDENT, disabled: true, enrollmentPending: true },
+        data: { enrollmentPending: false, disabled: false }
+      });
+      if (!result.count) throw new ApiError(409, 'This account has no pending enrollment request.');
+      return { message: 'Resident enrollment approved.' };
+    }
     if(target.disabled && !change.delete) throw new ApiError(409,'This account is deactivated.');
     if(change.role && change.role===target.role) throw new ApiError(400,'User already has this role.');
     if(!target.disabled && target.role===ROLES.ADMIN && (change.delete || change.role===ROLES.RESIDENT)) {
-      const admins=await tx.user.count({where:{role:ROLES.ADMIN,disabled:false}});
+      const admins=await tx.user.count({where:{...societyScope(actor),role:ROLES.ADMIN,disabled:false}});
       if(admins<=1) throw new ApiError(409,'The final active administrator cannot be removed or demoted.');
     }
     if(change.delete) {
-      // Nullable ON DELETE SET NULL relationships keep all financial and audit rows intact.
+      // Nullable ON DELETE SET NULL relationships keep all retained history and audit rows intact.
       await tx.user.delete({where:{id:targetUserId}});
       return {id:targetUserId};
     }
@@ -147,6 +157,7 @@ async function updateUserProfile(userId, { name, phone, flatNumber, tower }, ava
 }
 
 module.exports = {
+  approveEnrollment: (target, actor) => changeAccount(target, actor, { approve: true }),
   listUsers,
   updateUserRole,
   deleteUser,

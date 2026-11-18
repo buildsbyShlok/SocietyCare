@@ -8,7 +8,7 @@ const ApiError = require('../utils/ApiError');
 async function list(req, res, next) {
   try {
     const { search } = req.query;
-    const users = await userService.listUsers({ search });
+    const users = await userService.listUsers({ search }, req.user);
     res.status(200).json({
       success: true,
       data: users,

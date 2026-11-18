@@ -15,7 +15,7 @@ export default function Welcome() {
           <span className="estate-index">RESIDENT SERVICES</span>
           <h1>SocietyCare</h1>
           <p>
-            Sign in to see your society’s notices, maintenance bills and community conversations.
+            Sign in to see your society’s notices, service requests and community conversations.
           </p>
           <div className="ws-inline">
             <Link className="btn btn-primary" to="/login">

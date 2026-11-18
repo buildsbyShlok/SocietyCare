@@ -5,11 +5,12 @@ import { StatusBadge, PriorityBadge } from './StatusBadge';
 import { CATEGORY_LABELS } from '../utils/constants';
 import { formatDate } from '../utils/helpers';
 import './ComplaintCard.css';
+import ComplaintSource from './ComplaintSource';
 
 /**
  * ComplaintCard — Modernized SaaS Issue Row with subtle animations & JetBrains Mono ID
  */
-export default function ComplaintCard({ complaint, index = 0 }) {
+export default function ComplaintCard({ complaint, index = 0, showAsset = false }) {
   const shortId = complaint.id ? `#${complaint.id.slice(-6).toUpperCase()}` : '';
 
   return (
@@ -26,6 +27,8 @@ export default function ComplaintCard({ complaint, index = 0 }) {
           <div className="complaint-row-text">
             <span className="complaint-row-title">{complaint.title}</span>
             <div className="complaint-row-subtitles">
+              {showAsset && <ComplaintSource source={complaint.source} />}
+              {showAsset && !complaint.resident && <span>Deleted resident</span>}
               <span className="complaint-row-category">
                 {CATEGORY_LABELS[complaint.category] || complaint.category}
               </span>
@@ -68,6 +71,7 @@ export default function ComplaintCard({ complaint, index = 0 }) {
           <ChevronRight size={16} className="complaint-row-chevron" />
         </div>
       </Link>
+      {showAsset && <div className="complaint-asset-link">{complaint.asset ? <Link to={'/assets/' + complaint.asset.id}>{complaint.asset.name} · {complaint.asset.assetCode}</Link> : 'Not linked to an asset'}</div>}
     </motion.div>
   );
 }

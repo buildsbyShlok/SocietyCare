@@ -80,6 +80,10 @@ async function run() {
           request(app)
             [method]("/api" + path)
             .auth(token, { type: "bearer" });
+        await tx.$executeRawUnsafe('SAVEPOINT asset_phase_check');
+        await require('./asset-check')({ api, app, tx, admin, a, r, outsider, salt });
+        await tx.$executeRawUnsafe('ROLLBACK TO SAVEPOINT asset_phase_check');
+        await tx.$executeRawUnsafe('RELEASE SAVEPOINT asset_phase_check');
         await request(app).get("/api/community").expect(401);
         await api("patch", "/society", r)
           .send({ name: "Forbidden" })
@@ -179,64 +183,17 @@ async function run() {
         console.log(
           "PASS events: persistence, owner/admin management, public viewing, invalid dates/images, unavailable uploads, soft removal; notice details/categories/RBAC",
         );
-        const bill = {
-          residentId: owner.id,
-          amount: "99.75",
-          month: "2026-06",
-          dueDate: "2026-06-15",
-        };
-        await api("post", "/billing", r).send(bill).expect(403);
-        const issued = (await api("post", "/billing", a).send(bill).expect(201))
-          .body;
-        assert.equal(issued.status, "OVERDUE");
-        assert.equal(
-          (await api("get", "/billing", r)).body.items[0].id,
-          issued.id,
-        );
-        assert.equal(
-          (await api("get", "/billing", outsider)).body.items.length,
-          0,
-        );
-        assert.equal(
-          Number((await api("get", "/dashboard", r)).body.outstanding),
-          99.75,
-        );
-        // PostgreSQL marks unique-constraint failures inside an outer transaction as aborted.
-        // Bound each expected conflict with a savepoint so the rest of this QA run can proceed.
-        await tx.$executeRawUnsafe("SAVEPOINT duplicate_bill");
-        await api("post", "/billing", a).send(bill).expect(409);
-        await tx.$executeRawUnsafe("ROLLBACK TO SAVEPOINT duplicate_bill");
-        await api("post", "/billing/" + issued.id + "/payment", r)
-          .send({ reference: salt })
-          .expect(403);
-        const receipt = (
-          await api("post", "/billing/" + issued.id + "/payment", a)
-            .send({ reference: salt })
-            .expect(201)
-        ).body;
-        const paid = (await api("get", "/billing", r)).body.items[0];
-        assert.equal(paid.status, "PAID");
-        assert.equal(paid.payment.id, receipt.id);
-        assert.equal(
-          Number((await api("get", "/dashboard", r)).body.outstanding),
-          0,
-        );
+        // Billing remains in historical database migrations but has no live product API.
+        await api("get", "/billing", a).expect(404);
         const profile = (
           await api("get", "/users/" + owner.id + "/record", a).expect(200)
         ).body;
-        assert.equal(profile.bills[0].payment.id, receipt.id);
+        assert.equal(profile.bills, undefined);
         assert.equal(profile.password, undefined);
         await api("get", "/users/" + owner.id + "/record", outsider).expect(
           403,
         );
-        await tx.$executeRawUnsafe("SAVEPOINT duplicate_payment");
-        await api("post", "/billing/" + issued.id + "/payment", a)
-          .send({ reference: salt })
-          .expect(409);
-        await tx.$executeRawUnsafe("ROLLBACK TO SAVEPOINT duplicate_payment");
-        console.log(
-          "PASS invoices, overdue and paid states, duplicate protection, receipts, dashboard balances, private profile history",
-        );
+        console.log("PASS retired billing API is unavailable and private profiles contain no billing data");
         const message = (
           await api("post", "/community", r)
             .send({ body: "Integration test message" })
@@ -476,15 +433,13 @@ async function run() {
         const survivingMessage=await tx.communityMessage.create({data:{senderId:owner.id,body:"Retained community discussion"}});
         await api("delete", "/users/" + owner.id, a).expect(200);
         assert.equal(await tx.user.findUnique({where:{id:owner.id}}),null);
-        assert.ok(await tx.bill.findUnique({where:{id:issued.id}}));
-        assert.ok(await tx.payment.findUnique({where:{id:receipt.id}}));
         assert.ok(await tx.event.findUnique({where:{id:event.id}}));
         assert.ok(await tx.communityMessage.findUnique({where:{id:message.id}}));
         assert.ok(await tx.complaint.findUnique({where:{id:ownTicket.id}}));
         await api("delete", "/users/" + owner.id, a).expect(404);
         console.log("PASS role promotion/demotion, payload tampering denial, self-protection, resident deletion denial and permanent account deletion with relations retained");
 
-        await api("get", "/billing", r).expect(401);
+        await api("get", "/billing", r).expect(404);
         await request(app)
           .post("/api/auth/login")
           .send({ email: owner.email, password })
@@ -494,9 +449,6 @@ async function run() {
         );
         await api("get","/auth/me",r).expect(401);
         await api("get","/users/"+owner.id+"/record",a).expect(404);
-        assert.equal((await tx.bill.findUnique({where:{id:issued.id}})).residentId,null);
-        const billAfter=(await api("get","/billing",a)).body.items.find(b=>b.id===issued.id);
-        assert.equal(billAfter.resident,null);assert.equal(billAfter.payment.id,receipt.id);
         const eventAfter=(await api("get","/events/"+survivingEvent.id,outsider).expect(200)).body;
         assert.equal(eventAfter.creator,null);
         const chatAfter=(await api("get","/community",outsider)).body.items.find(m=>m.id===survivingMessage.id);
@@ -504,17 +456,16 @@ async function run() {
         await api("get","/complaints/"+survivingTicket.id,outsider).expect(403);
         assert.equal((await api("get","/complaints/"+survivingTicket.id,a).expect(200)).body.complaint.resident,null);
         await api("patch","/complaints/"+survivingTicket.id+"/status",a).send({status:"IN_PROGRESS",remark:"Owner account deleted; work continues."}).expect(200);
-        // Exercise reporter, author, audit actor and payment-verifier foreign keys too.
+        // Exercise reporter, author and audit-actor foreign keys too.
         await api("delete","/users/"+other.id,a).expect(200);
         assert.equal((await tx.messageReport.findFirst({where:{messageId:message.id}})).reporterId,null);
         const replacementAdmin=await account("ADMIN"), replacementToken=await login(replacementAdmin);
         await api("delete","/users/"+admin.id,replacementToken).expect(200);
         await api("get","/auth/me",a).expect(401);
-        assert.equal((await tx.payment.findUnique({where:{id:receipt.id}})).verifiedById,null);
         assert.equal((await tx.complaintHistory.findUnique({where:{id:audit.id}})).changedById,null);
         assert.equal((await tx.notice.findUnique({where:{id:notice.id}})).authorId,null);
         assert.equal((await api("get","/notices/"+notice.id,replacementToken).expect(200)).body.author,null);
-        console.log("PASS all eight nullable user relationships, retained active content/financial records, post-deletion management and revoked sessions");
+        console.log("PASS nullable user relationships, retained active content, post-deletion management and revoked sessions");
         throw rollback;
       },
       { timeout: 30000 },

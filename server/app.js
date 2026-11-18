@@ -15,7 +15,7 @@ const app = express();
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type'],
 }));
 
@@ -38,8 +38,8 @@ app.get("/health", (req, res) => {
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
 app.use('/api/events', require('./src/routes/event.routes'));
+app.use('/api/assets', require('./src/routes/asset.routes'));
 app.use('/api/community', require('./src/routes/community.routes'));
-app.use('/api/billing', require('./src/routes/billing.routes'));
 app.use('/api/society', require('./src/routes/society.routes'));
 app.use('/api/auth', authRoutes);
 app.use('/api/complaints', complaintRoutes);

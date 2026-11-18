@@ -4,6 +4,7 @@ import { Load, Row, Section, useResource } from "../components/Workspace";
 import Courtyard from "../components/Courtyard";
 import HomeAnnouncements from "../components/HomeAnnouncements";
 import { useAuth } from "../context/AuthContext";
+import "./Home.css";
 export default function Home() {
   const info = useResource("/society"),
     events = useResource("/events?upcoming=true&limit=3");
@@ -32,16 +33,24 @@ export default function Home() {
                 </strong>
               </div>
             </header>
-            <Courtyard />
+            <div className="home-focus-grid">
+              <section className="home-model-pane" aria-label="Society overview">
+                <Courtyard />
+              </section>
+              <section className="home-announcement-pane" aria-labelledby="home-announcements-heading">
+                <header>
+                  <div>
+                    <h2 id="home-announcements-heading">Announcements</h2>
+                    <p>Official updates from society management</p>
+                  </div>
+                  <Link to="/notices">Notice board</Link>
+                </header>
+                <HomeAnnouncements />
+              </section>
+            </div>
           </>
         )}
       </Load>
-      <Section
-        title="Announcements"
-        action={<Link to="/notices">Notice board</Link>}
-      >
-        <HomeAnnouncements />
-      </Section>
       <Section
         title="Upcoming events"
         action={<Link to="/events">All events</Link>}

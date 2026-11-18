@@ -1,10 +1,11 @@
 const prisma = require('../config/db');
 const ApiError = require('../utils/ApiError');
+const { societyScope } = require('../utils/society-scope');
 async function profileRecord(id, viewer) {
   if (viewer.id !== id && viewer.role !== 'ADMIN')
     throw new ApiError(403, 'This profile is private.');
   const record = await prisma.user.findUnique({
-    where: { id },
+    where: { id, ...societyScope(viewer) },
     select: {
       id: true,
       name: true,
@@ -16,19 +17,9 @@ async function profileRecord(id, viewer) {
       createdAt: true,
       role: true,
       complaints: {
-        where: { deletedAt: null },
+        where: { deletedAt: null, ...societyScope(viewer) },
         orderBy: { createdAt: 'desc' },
         select: { id: true, title: true, status: true, archivedAt: true, createdAt: true },
-      },
-      bills: {
-        where: { payment: { isNot: null } },
-        orderBy: { month: 'desc' },
-        select: {
-          id: true,
-          month: true,
-          amount: true,
-          payment: { select: { id: true, paidAt: true, reference: true } },
-        },
       },
     },
   });

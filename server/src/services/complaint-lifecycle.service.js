@@ -1,9 +1,9 @@
 const prisma = require('../config/db');
 const ApiError = require('../utils/ApiError');
 const { field } = require('../utils/workspace');
-function ownerScope(user) { return user.role === 'ADMIN' ? {} : {residentId:user.id}; }
+const { societyScope, complaintScope: ownerScope } = require('../utils/society-scope');
 async function ownedComplaint(id,user) {
-  const complaint=await prisma.complaint.findUnique({where:{id},select:{residentId:true,archivedAt:true,deletedAt:true}});
+  const complaint=await prisma.complaint.findUnique({where:{id,...societyScope(user)},select:{residentId:true,archivedAt:true,deletedAt:true}});
   if(!complaint || complaint.deletedAt) throw new ApiError(404,'Complaint not found.');
   if(user.role!=='ADMIN' && complaint.residentId!==user.id) throw new ApiError(403,'You can only manage your own complaints.');
   return complaint;

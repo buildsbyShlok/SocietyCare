@@ -1,6 +1,7 @@
 import { Brand } from '../components/Workspace';
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
+import { safeReportReturn, reportAuthPath } from '../utils/report-return';
 import { motion } from 'framer-motion';
 import { Building2 } from 'lucide-react';
 import { auth as authApi } from '../api/index';
@@ -57,8 +58,10 @@ function validate(form) {
  *   - Both cases are surfaced in the alert banner
  */
 export default function Register() {
-  const { user, loading: authLoading, login: setAuth } = useAuth();
-  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const [receipt, setReceipt] = useState('');
+  const location = useLocation();
+  const returnTo = safeReportReturn(new URLSearchParams(location.search).get('returnTo'));
 
   const [form, setForm] = useState({
     name: '',
@@ -85,7 +88,7 @@ export default function Register() {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={returnTo} replace />;
   }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -109,9 +112,9 @@ export default function Register() {
 
     setSubmitting(true);
     try {
-      const data = await authApi.register(form);
-      setAuth(data.token, data.user);
-      navigate('/', { replace: true });
+      const qrToken = returnTo === '/' ? undefined : new URL(returnTo, window.location.origin).pathname.split('/').pop();
+      const data = await authApi.register({ ...form, qrToken });
+      setReceipt(data.message);
     } catch (err) {
       // Server returns either err.message (string) or err.errors (string[])
       if (err.errors && err.errors.length > 0) {
@@ -139,10 +142,10 @@ export default function Register() {
           <h1 className="auth-title">
             Society<span style={{ color: 'var(--color-accent-highlight)' }}>Care</span>
           </h1>
-          <p className="auth-subtitle">Create your resident portal account</p>
+          <p className="auth-subtitle">Request access from your society administrator</p>
         </header>
 
-        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+        {receipt ? <p role="status" className="alert alert-success">{receipt}</p> : <form className="auth-form" onSubmit={handleSubmit} noValidate>
 
           {apiError && (
             <div className="auth-api-error" role="alert">
@@ -272,15 +275,15 @@ export default function Register() {
             className="btn btn-primary auth-submit"
             disabled={submitting}
           >
-            {submitting ? 'Creating account…' : 'Create Account'}
+            {submitting ? 'Requesting enrollment…' : 'Request enrollment'}
           </button>
 
-        </form>
+        </form>}
 
         <hr className="auth-divider" />
         <p className="auth-footer">
           Already have an account?{' '}
-          <Link to="/login">Sign in</Link>
+          <Link to={reportAuthPath('/login', returnTo)}>Sign in</Link>
         </p>
 
       </motion.div>

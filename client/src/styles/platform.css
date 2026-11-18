@@ -148,15 +148,6 @@
 .metric-note {
   font-size: 12px;
 }
-.invoice-id {
-  font-size: 11px;
-}
-.invoice-row {
-  font-size: 13px;
-}
-.invoice-status {
-  font-size: 12px;
-}
 .reading-body {
   font-size: 16px;
   line-height: 1.85;
@@ -309,32 +300,6 @@ dialog.sc-dialog .dup-modal-close {
 .resident-record-heading dd {
   font-size: 13px;
 }
-.profile-payment {
-  display: grid;
-  grid-template-columns: 1fr 2fr auto;
-  gap: 24px;
-  padding: 20px 0;
-  border-bottom: 1px solid var(--color-gray-200);
-  color: var(--color-gray-800);
-}
-.profile-payment:hover {
-  color: var(--color-accent-highlight);
-}
-.profile-payment div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-.profile-payment span,
-.profile-payment small {
-  color: var(--color-gray-500);
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-.profile-payment > strong {
-  font-variant-numeric: tabular-nums;
-}
 .avatar-preview-wrapper {
   padding: 0;
   border: 1px solid var(--color-gray-200);
@@ -394,13 +359,5 @@ dialog.sc-dialog .dup-modal-close {
   .resident-record-heading dl {
     margin-left: 0;
     width: 100%;
-  }
-  .profile-payment {
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-  }
-  .profile-payment > div:nth-child(2) {
-    grid-column: 1/-1;
-    grid-row: 2;
   }
 }

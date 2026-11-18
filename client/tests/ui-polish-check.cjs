@@ -16,10 +16,11 @@ async function main() {
         'export {default as Home} from "./src/pages/Home";',
         'export {default as Courtyard} from "./src/components/Courtyard";',
         'export {default as Dashboard} from "./src/pages/Dashboard";',
-        'export {default as Billing,InvoiceDetail} from "./src/pages/Billing";',
         'export {default as Notices} from "./src/components/HomeAnnouncements";',
         'export {default as NoticeDetail} from "./src/pages/NoticeDetail";',
         'export {default as Events,EventDetail} from "./src/pages/Events";',
+        'export {default as Assets,AssetDetail,AssetEditor} from "./src/pages/Assets";',
+        'export {QRComplaintForm} from "./src/pages/QRReport";',
         'export {default as Community} from "./src/pages/Community";',
         'export {default as Archive} from "./src/components/ArchiveComplaint";',
         'export {ResidentRecord} from "./src/components/ResidentRecord";',
@@ -27,6 +28,9 @@ async function main() {
         'export {default as Dialog} from "./src/components/Dialog";',
         'export {default as Complaints} from "./src/pages/Complaints";',
         'export {default as UserManagement} from "./src/pages/UserManagement";',
+        'export {default as ComplaintCard} from "./src/components/ComplaintCard";',
+        'export {default as ComplaintSource} from "./src/components/ComplaintSource";',
+        'export {default as AssetHistory} from "./src/components/AssetComplaintHistory";',
       ].join("\n"),
       resolveDir: root,
       loader: "jsx",
@@ -136,21 +140,6 @@ async function main() {
     creatorId: "resident",
     creator: { name: "Host", tower: "A", flatNumber: "101" },
   };
-  const bill = {
-    id: "invoice-1",
-    month:
-      new Date().getFullYear() +
-      "-" +
-      String(new Date().getMonth() + 1).padStart(2, "0"),
-    amount: "1234.56",
-    resident: { name: "Resident" },
-    tower: "A",
-    flatNumber: "101",
-    dueDate: "2026-11-20",
-    createdAt: "2026-11-01T10:00:00Z",
-    status: "PENDING",
-    payment: null,
-  };
   check(
     "Society retains full geometry without viewer controls or surrounding UI",
     () => {
@@ -192,6 +181,7 @@ async function main() {
       const h = render("Home");
       assert.equal((h.match(/href="\/notices\/notice-1"/g) || []).length, 1);
       assert.match(h, /href="\/notices\/notice-2"/);
+      assert.match(h, /home-focus-grid/);
       assert.doesNotMatch(
         h,
         /home-services|href="\/billing"|href="\/complaints"/,
@@ -216,61 +206,6 @@ async function main() {
         byStatus: { OPEN: 0, IN_PROGRESS: 0, RESOLVED: 0 },
       };
       assert.doesNotMatch(render("Dashboard"), /NaN|Infinity/);
-    },
-  );
-  check(
-    "Invoice register links, cent-accurate totals and full paid receipt",
-    () => {
-      ui.data["/billing"] = { items: [bill] };
-      const h = render("Billing");
-      assert.match(h, /href="\/billing\/invoice-1"/);
-      assert.match(h, /1,234\.56/);
-      assert.match(h, /Flat A \/ 101/);
-      let detail = render(
-        "InvoiceDetail",
-        {},
-        "/billing/invoice-1",
-        "/billing/:id",
-      );
-      assert.match(detail, /Balance due/);
-      assert.doesNotMatch(detail, /Verify full payment/);
-      ui.data["/billing"].items[0] = {
-        ...bill,
-        status: "PAID",
-        payment: {
-          id: "receipt-1",
-          reference: "bank-1",
-          paidAt: "2026-11-06T10:00:00Z",
-        },
-      };
-      detail = render(
-        "InvoiceDetail",
-        {},
-        "/billing/invoice-1",
-        "/billing/:id",
-      );
-      assert.match(detail, /receipt-1/);
-      assert.match(detail, /bank-1/);
-      assert.match(detail, /Balance due<\/span><strong>₹0\.00/);
-    },
-  );
-  check(
-    "Invoice missing, loading and error states; only admin can verify",
-    () => {
-      ui.data["/billing"] = { items: [bill] };
-      ui.user.role = "ADMIN";
-      assert.match(
-        render("InvoiceDetail", {}, "/billing/invoice-1", "/billing/:id"),
-        /Verify full payment/,
-      );
-      assert.match(
-        render("InvoiceDetail", {}, "/billing/other", "/billing/:id"),
-        /Invoice not found/,
-      );
-      delete ui.data["/billing"];
-      assert.match(render("InvoiceDetail"), /Loading/);
-      ui.errors = { "/billing": "Connection failed" };
-      assert.match(render("InvoiceDetail"), /role="alert"/);
     },
   );
   check(
@@ -339,6 +274,8 @@ async function main() {
       assert.match(h, /Community attachment/);
       assert.match(h, /Unit A \/ 101/);
       assert.match(h, /aria-label="Send message"/);
+      assert.match(h, /About this group/);
+      assert.match(h, /Authenticated society residents and administrators/);
       assert.doesNotMatch(h, /<script>|Remove message/);
       ui.user.role = "ADMIN";
       assert.match(render("Community"), /Remove/);
@@ -357,44 +294,6 @@ async function main() {
     },
   );
   check(
-    "Private profile renders actual supplied receipts and invoice links",
-    () => {
-      ui.data["/users/resident/record"] = {
-        ...ui.user,
-        name: "Resident",
-        email: "resident@example.test",
-        createdAt: "2026-11-01",
-        complaints: [],
-        bills: [
-          {
-            ...bill,
-            payment: {
-              id: "receipt-real",
-              reference: "reference-real",
-              paidAt: "2026-11-06",
-            },
-          },
-        ],
-      };
-      const h = render("ResidentRecord", { id: "resident", details: true });
-      assert.match(h, /Maintenance payment history/);
-      assert.match(h, /receipt-real/);
-      assert.match(h, /reference-real/);
-      assert.match(h, /href="\/billing\/invoice-1"/);
-      ui.data["/users/resident/record"].bills = [];
-      assert.match(
-        render("ResidentRecord", { id: "resident" }),
-        /No verified maintenance payments/,
-      );
-      delete ui.data["/users/resident/record"];
-      ui.errors = { "/users/resident/record": "This profile is private." };
-      assert.doesNotMatch(
-        render("ResidentRecord", { id: "resident" }),
-        /receipt-real/,
-      );
-    },
-  );
-  check(
     "Navigation has Home logo, mobile disclosure and role-scoped admin link",
     () => {
       const h = render("Navbar", { collapsed: false, onToggle: () => {} });
@@ -402,11 +301,12 @@ async function main() {
       assert.match(h, /aria-controls="main-navigation"/);
       assert.match(h, /aria-expanded="false"/);
       assert.doesNotMatch(h, /Admin Management/);
+      assert.doesNotMatch(h, /Maintenance &amp; Billing|Dashboard/);
       ui.user.role = "ADMIN";
-      assert.match(
-        render("Navbar", { collapsed: true, onToggle: () => {} }),
-        /Admin Management/,
-      );
+      const adminNav = render("Navbar", { collapsed: true, onToggle: () => {} });
+      assert.match(adminNav, /Admin Management/);
+      assert.match(adminNav, /Dashboard/);
+      assert.doesNotMatch(adminNav, /Maintenance &amp; Billing/);
     },
   );
   check("Archived complaint route selects the archive filter for residents", () => {
@@ -426,8 +326,6 @@ async function main() {
     assert.match(h,/href="\/admin\/residents\/eligible"/);
   });
   check("Retained content renders without deleted account relationships", () => {
-    ui.data["/billing"]={items:[{...bill,resident:null}]};
-    assert.match(render("InvoiceDetail",{},"/billing/invoice-1","/billing/:id"),/Deleted account/);
     ui.data["/events/event-1"]={...event,creator:null,creatorId:null};
     assert.match(render("EventDetail",{},"/events/event-1","/events/:id"),/Deleted account/);
     ui.data["/notices/notice-1"]={...notice,author:null};
@@ -445,6 +343,71 @@ async function main() {
     assert.match(h, /<dialog/);
     assert.match(h, /aria-label="Photo evidence"/);
     assert.match(h, /<button>Close/);
+  });
+  const asset = { id: 'asset-1', name: 'Passenger lift', assetCode: 'LIFT-A-01', location: 'Tower A lobby', category: 'Lift', description: '<script>unsafe</script>', qrToken: 'a'.repeat(43), status: 'ACTIVE', createdAt: '2026-11-13T10:00:00Z', updatedAt: '2026-11-13T10:00:00Z' };
+  check('Assets render cards, pagination, empty and retry states', () => {
+    ui.data['/assets?page=1'] = { items: [asset], total: 1, hasNext: false };
+    const h = render('Assets');
+    assert.match(h, /href="\/assets\/asset-1"/); assert.match(h, /LIFT-A-01/); assert.match(h, /Tower A lobby/); assert.match(h, /Active/); assert.doesNotMatch(h, /Asset pages/);
+    ui.data['/assets?page=1'].hasNext = true; assert.match(render('Assets'), /Asset pages/);
+    ui.data['/assets?page=1'] = { items: [], total: 0 }; assert.match(render('Assets'), /No assets registered yet/);
+    delete ui.data['/assets?page=1']; assert.match(render('Assets'), /Loading/);
+    ui.errors = { '/assets?page=1': 'Unable to load assets' }; assert.match(render('Assets'), /Retry/);
+  });
+  check('Asset details escape content and generate token-based reporting URL', () => {
+    const previous = globalThis.window;
+    globalThis.window = { location: { origin: 'https://society.example' } };
+    try {
+      ui.data['/assets/asset-1'] = asset;
+      const h = render('AssetDetail', {}, '/assets/asset-1', '/assets/:id');
+      assert.match(h, /https:\/\/society.example\/report\/a{43}/); assert.doesNotMatch(h, /report\/asset-1/);
+      assert.match(h, /&lt;script&gt;/); assert.match(h, /Deactivate asset/); assert.match(h, /Delete asset/); assert.match(h, /Print QR/); assert.match(h, /Scan to report a fault/);
+      ui.data['/assets/asset-1'] = { ...asset, status: 'INACTIVE' }; assert.match(render('AssetDetail', {}, '/assets/asset-1', '/assets/:id'), /Activate asset/);
+      delete ui.data['/assets/asset-1']; ui.errors = { '/assets/asset-1': 'Asset not found.' }; assert.match(render('AssetDetail', {}, '/assets/asset-1', '/assets/:id'), /Asset not found/);
+    } finally { globalThis.window = previous; }
+  });
+  check('Asset editor labels fields and navigation remains admin-only', () => {
+    const h = render('AssetEditor', {}, '/assets/new');
+    for (const field of ['name', 'assetCode', 'location', 'category', 'description']) assert.match(h, new RegExp('name="' + field + '"'));
+    assert.match(h, /Create asset/); assert.match(h, /Cancel/);
+    assert.doesNotMatch(render('Navbar'), /Asset Management/);
+    ui.user.role = 'ADMIN'; assert.match(render('Navbar'), /Asset Management/);
+  });
+  check('Admin complaint integration exposes source, linked equipment and real asset history', () => {
+    ui.user.role = 'ADMIN';
+    const complaint = {
+      id: 'complaint-1', title: 'Lift stopped', category: 'LIFT', priority: 'HIGH', status: 'OPEN',
+      source: 'QR', createdAt: '2026-11-14T10:00:00Z', resident: { name: 'Resident', flatNumber: '101' },
+      asset: { id: asset.id, name: asset.name, assetCode: asset.assetCode },
+    };
+    const qr = render('ComplaintSource', { source: 'QR' });
+    assert.match(qr, /QR/); assert.match(render('ComplaintSource', { source: 'MANUAL' }), /Manual/);
+    const row = render('ComplaintCard', { complaint, showAsset: true });
+    assert.match(row, /href="\/assets\/asset-1"/);
+    const noAsset = render('ComplaintCard', { complaint: { ...complaint, asset: null }, showAsset: true });
+    assert.match(noAsset, /Not linked to an asset/);
+    ui.data['/assets/asset-1/complaints?page=1'] = {
+      items: [complaint], totalItems: 1, totalPages: 1, currentPage: 1, hasNextPage: false, hasPreviousPage: false,
+      byStatus: { OPEN: 1, IN_PROGRESS: 0, RESOLVED: 0 },
+    };
+    const history = render('AssetHistory', { assetId: asset.id });
+    assert.match(history, /Complaint History/); assert.match(history, /Lift stopped/); assert.match(history, /Total/); assert.match(history, /QR/);
+    ui.data['/dashboard'] = {
+      totalComplaints: 1, overdueCount: 0, byStatus: { OPEN: 1, IN_PROGRESS: 0, RESOLVED: 0 },
+      assets: { active: 3, inactive: 1, qrComplaints: 1, openComplaints: 1, mostReported: [{ id: asset.id, name: asset.name, assetCode: asset.assetCode, complaintCount: 1 }] },
+    };
+    ui.data['/complaints?limit=5'] = { items: [complaint] };
+    ui.data['/notices?limit=5&sort=latest'] = { items: [] };
+    const dashboard = render('Dashboard');
+    for (const label of ['Active assets', 'Inactive assets', 'QR complaints', 'Open asset complaints', 'Most reported equipment']) assert.match(dashboard, new RegExp(label));
+    assert.match(dashboard, /Passenger lift/); assert.match(dashboard, /QR · Passenger lift · LIFT-A-01/);
+  });
+  check('QR form displays immutable equipment and reuses existing complaint/photo fields', () => {
+    const h = render('QRComplaintForm', { qrToken: 'q'.repeat(43), asset, token: 'test-only' });
+    assert.equal((h.match(/readOnly=""/g)||[]).length, 2);
+    for (const field of ['title','description','priority','photo']) assert.match(h, new RegExp('name="'+field+'"'));
+    for (const field of ['assetId','residentId','societyId','category','source']) assert.doesNotMatch(h, new RegExp('name="'+field+'"'));
+    assert.match(h, /Submit Complaint/); assert.match(h, /up to 5 MB/);
   });
   console.log(
     passed +

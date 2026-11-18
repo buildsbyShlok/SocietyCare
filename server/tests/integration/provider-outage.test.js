@@ -13,7 +13,7 @@ test('AI outage leaves normal complaint submission working and upload errors rem
     if (key === undefined) delete process.env.GROQ_API_KEY; else process.env.GROQ_API_KEY = key;
     prisma.user.findUnique = find; prisma.complaint.create = create;
   });
-  prisma.user.findUnique = async () => ({ id: 'qa', role: 'RESIDENT', disabled: false });
+  prisma.user.findUnique = async () => ({ id: 'qa', societyId: 1, role: 'RESIDENT', disabled: false });
   prisma.complaint.create = async ({ data }) => ({ id: 'qa-ticket', ...data });
   const token = jwt.sign({ id: 'qa' }, process.env.JWT_SECRET);
   const ai = await request(app).post('/api/ai/analyze-complaint').auth(token, { type: 'bearer' }).send({ complaint: 'The garden tap is leaking continuously.' });

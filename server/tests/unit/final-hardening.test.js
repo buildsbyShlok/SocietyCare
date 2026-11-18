@@ -40,8 +40,8 @@ test('duplicate detection respects resident ownership while admins retain societ
   t.after(()=>{if(key===undefined)delete process.env.GROQ_API_KEY;else process.env.GROQ_API_KEY=key;prisma.complaint.findMany=find;});
   const queries=[];
   prisma.complaint.findMany=async query=>{queries.push(query.where);return[];};
-  await ai.detectDuplicates('A test complaint about a leaking tap.',{id:'resident-1',role:'RESIDENT'});
-  await ai.detectDuplicates('A test complaint about a leaking tap.',{id:'admin-1',role:'ADMIN'});
+  await ai.detectDuplicates('A test complaint about a leaking tap.',{id:'resident-1',societyId: 1, role:'RESIDENT'});
+  await ai.detectDuplicates('A test complaint about a leaking tap.',{id:'admin-1',societyId: 1, role:'ADMIN'});
   assert.equal(queries[0].residentId,'resident-1');
   assert.equal(queries[1].residentId,undefined);
 });

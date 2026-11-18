@@ -38,6 +38,17 @@ export default function UserManagement() {
     } catch(err) { setError(err.message || "Could not complete the account action."); }
     finally { busy.current=false; setActioningId(null); setLoading(false); }
   }
+  async function approve(account) {
+    if (busy.current || !window.confirm('Approve this request only after independently confirming that this resident made the request and lives in the stated unit.')) return;
+    busy.current = true;
+    setActioningId(account.id); setError(''); setSuccessMessage('');
+    try {
+      await usersApi.approveEnrollment(account.id, token);
+      setUsers(previous => previous.map(u => u.id === account.id ? { ...u, disabled: false, enrollmentPending: false } : u));
+      setSuccessMessage('Resident enrollment approved.');
+    } catch (err) { setError(err.message); }
+    finally { busy.current = false; setActioningId(null); }
+  }
   const admin=currentUser?.role==="ADMIN";
   return <div className="page user-management-page">
     <header className="page-header"><div className="page-header-title">
@@ -75,9 +86,10 @@ export default function UserManagement() {
               </div></td>
               <td data-label="Unit"><span className="user-cell-flat-badge"><Home size={12}/>{[u.tower,u.flatNumber].filter(Boolean).join(" / ")||"Not recorded"}</span></td>
               <td data-label="Phone"><span className="user-cell-phone"><Phone size={12}/>{u.phone||"Not provided"}</span></td>
-              <td data-label="Role">{u.disabled?<span className="text-muted">Deactivated</span>:<span className={"role-badge role-badge--"+(u.role==="ADMIN"?"admin":"resident")}>{u.role==="ADMIN"?<ShieldCheck size={12}/>:<User size={12}/>} {u.role}</span>}</td>
+              <td data-label="Role">{u.disabled?<span className="text-muted">{u.enrollmentPending ? 'Pending approval' : 'Deactivated'}</span>:<span className={"role-badge role-badge--"+(u.role==="ADMIN"?"admin":"resident")}>{u.role==="ADMIN"?<ShieldCheck size={12}/>:<User size={12}/>} {u.role}</span>}</td>
               <td className="directory-actions-cell"><div className="directory-actions" role="group" aria-label={"Actions for "+u.name}>
                 <Link className="btn btn-secondary btn-sm" to={"/admin/residents/"+u.id}><Eye size={14}/>View</Link>
+                {admin && u.enrollmentPending && <button type="button" className="btn btn-secondary btn-sm" disabled={loading || Boolean(actioningId)} onClick={()=>approve(u)}>Approve enrollment</button>}
                 {self && <Link className="btn btn-secondary btn-sm" to="/settings"><Pencil size={14}/>Edit profile</Link>}
                 {admin && !self && !u.disabled && <button type="button" className="btn btn-secondary btn-sm" disabled={loading || Boolean(actioningId)} onClick={()=>manage(u,u.role==="ADMIN"?"RESIDENT":"ADMIN")}>
                   {u.role==="ADMIN"?<UserMinus size={14}/>:<ShieldCheck size={14}/>}

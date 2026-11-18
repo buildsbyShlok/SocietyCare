@@ -34,7 +34,7 @@ async function authenticate(req, res, next) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      select: { id: true, role: true, disabled: true },
+      select: { id: true, role: true, disabled: true, societyId: true },
     });
     if (!user || user.disabled || !['ADMIN', 'RESIDENT'].includes(user.role)) {
       return next(new ApiError(401, 'Account is no longer available'));

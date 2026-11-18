@@ -10,6 +10,7 @@ const router = Router();
 
 // All notice routes require authentication
 router.use(authenticate);
+router.use(require('../middleware/community-society'));
 
 router.get('/', list);
 router.get('/:id', require('../utils/workspace').endpoint(req => require('../services/notice.service').getNotice(req.params.id)));

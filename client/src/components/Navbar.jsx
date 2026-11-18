@@ -8,10 +8,10 @@ import {
   Megaphone,
   LayoutDashboard,
   ClipboardList,
-  Receipt,
   MessagesSquare,
   UserRound,
   Shield,
+  Boxes,
   Sun,
   Moon,
   LogOut,
@@ -22,10 +22,8 @@ import { Brand } from "./Workspace";
 import "./Navbar.css";
 const links = [
   ["/", "Home", House],
-  ["/dashboard", "Dashboard", LayoutDashboard],
   ["/complaints", "Complaints", ClipboardList],
   ["/notices", "Announcements", Megaphone],
-  ["/billing", "Maintenance & Billing", Receipt],
   ["/events", "Events", CalendarDays],
   ["/community", "Community", MessagesSquare],
   ["/settings", "My Profile", UserRound],
@@ -74,9 +72,10 @@ export default function Navbar({ collapsed, onToggle }) {
         aria-label="Main navigation"
       >
         {[
+          ...(user.role === "ADMIN" ? [["/dashboard", "Dashboard", LayoutDashboard]] : []),
           ...links,
           ...(user.role === "ADMIN"
-            ? [["/admin", "Admin Management", Shield]]
+            ? [["/assets", "Asset Management", Boxes], ["/admin", "Admin Management", Shield]]
             : []),
         ].map(([to, label, Icon]) => (
           <NavLink

@@ -2,17 +2,17 @@ const router = require('express').Router();
 const prisma = require('../config/db');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
-const { endpoint, field, dateOnly } = require('../utils/workspace');
+const { endpoint, field } = require('../utils/workspace');
 const ApiError = require('../utils/ApiError');
 
 router.use(authenticate);
 router.get(
   '/',
-  endpoint(async () => {
+  endpoint(async ({ user }) => {
     const [society, units] = await Promise.all([
-      prisma.society.findUnique({ where: { id: 1 } }),
+      prisma.society.findUnique({ where: { id: user.societyId } }),
       prisma.user.findMany({
-        where: { role: 'RESIDENT', disabled: false },
+        where: { societyId: user.societyId, role: 'RESIDENT', disabled: false },
         distinct: ['tower', 'flatNumber'],
         select: { flatNumber: true, tower: true },
       }),
@@ -27,7 +27,7 @@ router.get(
 router.patch(
   '/',
   authorize('ADMIN'),
-  endpoint(async ({ body }) => {
+  endpoint(async ({ body, user }) => {
     if (
       ![undefined, null, ''].includes(body.totalFlats) &&
       !['number', 'string'].includes(typeof body.totalFlats)
@@ -45,11 +45,8 @@ router.patch(
       address: field(body.address, 'address', 240, true),
       description: field(body.description, 'description', 800, true),
       totalFlats,
-      upcomingMaintenance:
-        field(body.upcomingMaintenance, 'maintenance information', 500, true) || null,
-      maintenanceDate: body.maintenanceDate ? dateOnly(body.maintenanceDate) : null,
     };
-    return prisma.society.upsert({ where: { id: 1 }, update: data, create: { id: 1, ...data } });
+    return prisma.society.upsert({ where: { id: user.societyId }, update: data, create: { id: user.societyId, ...data } });
   }),
 );
 module.exports = router;

@@ -3,6 +3,8 @@ const prisma = require('../config/db');
 const ApiError = require('../utils/ApiError');
 const { ROLES, STATUS, CATEGORY, PRIORITY, ALLOWED_STATUS_TRANSITIONS } = require('../utils/constants');
 const { sendStatusUpdateEmail } = require('./email.service');
+const { societyScope, complaintScope } = require('../utils/society-scope');
+const assetSelect = { id: true, name: true, assetCode: true, category: true, location: true };
 
 
 
@@ -24,16 +26,22 @@ const { sendStatusUpdateEmail } = require('./email.service');
  * @param {object}     [file]     - Multer file object (req.file), may be undefined
  * @returns {object}   Created complaint record
  */
-async function createComplaint(data, residentId, file) {
+async function createComplaint(data, residentId, file, societyId) {
   const { title, description, category, priority } = data;
+
+  const qr = data.qrToken !== undefined;
+  const report = require('./qr-report.service');
+  if (qr) await report.resolveReportAsset(data.qrToken, residentId);
 
   const image = await uploadImage(file, 'complaints');
 
-  const complaint = await prisma.complaint.create({
+  const insert = (db, asset) => db.complaint.create({
     data: {
+      ...societyScope({ societyId: asset?.societyId ?? societyId }),
       title: title.trim(),
       description: description.trim(),
-      category,
+      category: asset ? report.complaintCategory(asset) : category,
+      ...(asset ? { assetId: asset.id, source: 'QR' } : {}),
       priority,
       residentId,
       photoUrl: image?.url ?? null,
@@ -54,8 +62,9 @@ async function createComplaint(data, residentId, file) {
       },
     },
   });
-
-  return complaint;
+  return qr
+    ? prisma.$transaction(async tx => insert(tx, await report.lockReportAsset(tx, data.qrToken, residentId)))
+    : insert(prisma);
 }
 
 /**
@@ -85,7 +94,16 @@ async function listComplaints(filters, user) {
   // Extract pagination params
   const { page, limit, skip, take } = require('../utils/pagination')(filters);
 
-  const where = { deletedAt:null, archivedAt: filters.archived === 'true' ? { not: null } : null };
+  const where = { ...complaintScope(user), deletedAt:null, archivedAt: filters.archived === 'true' ? { not: null } : null };
+  if (filters.source !== undefined && filters.source !== '') {
+    if (!['QR', 'MANUAL'].includes(filters.source)) throw new ApiError(400, 'Source must be QR or MANUAL.');
+    where.source = filters.source;
+  }
+  if (filters.assetId !== undefined && filters.assetId !== '') {
+    if (typeof filters.assetId !== 'string' || filters.assetId.length > 100) throw new ApiError(400, 'Invalid asset filter.');
+    where.assetId = filters.assetId;
+    where.asset = societyScope(user);
+  }
  
   // Residents see only their own complaints
   if (user.role === ROLES.RESIDENT) {
@@ -135,11 +153,13 @@ async function listComplaints(filters, user) {
     prisma.complaint.count({ where }),
     prisma.complaint.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       skip,
       take,
       select: {
         id: true,
+        source: true,
+        asset: { select: assetSelect },
         title: true,
         description: true,
         category: true,
@@ -180,9 +200,11 @@ async function listComplaints(filters, user) {
  */
 async function getComplaintById(id, user) {
   const complaint = await prisma.complaint.findUnique({
-    where: { id },
+    where: { id, ...societyScope(user) },
     select: {
       id: true,
+      source: true,
+      asset: { select: assetSelect },
       title: true,
       description: true,
       category: true,
@@ -248,7 +270,7 @@ async function updateComplaintStatus(id, data, admin) {
 
   // Load current status + resident contact details for email notification
   const existing = await prisma.complaint.findUnique({
-    where: { id },
+    where: { id, ...societyScope(admin), deletedAt: null },
     select: {
       status: true,
       archivedAt: true,
@@ -295,7 +317,7 @@ async function updateComplaintStatus(id, data, admin) {
   // Atomically update the complaint and append the history record
   await prisma.$transaction(async (tx) => {
     try {
-      await tx.complaint.update({ where: { id, archivedAt:null, status:existing.status, priority:existing.priority }, data:updateData });
+      await tx.complaint.update({ where: { id, ...societyScope(admin), deletedAt:null, archivedAt:null, status:existing.status, priority:existing.priority }, data:updateData });
     } catch (error) {
       if (error.code==='P2025') throw new ApiError(409,'Complaint changed. Refresh before updating.');
       throw error;

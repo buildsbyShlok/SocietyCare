@@ -13,7 +13,7 @@ const {
 
 async function create(req, res, next) {
   try {
-    const complaint = await createComplaint(req.body, req.user.id, req.file);
+    const complaint = await createComplaint(req.body, req.user.id, req.file, req.user.societyId);
     res.status(201).json({ message: 'Complaint submitted successfully', complaint });
   } catch (err) {
     next(err);

@@ -354,3 +354,33 @@
 }
 
 .complaint-lifecycle-filter { margin-bottom: var(--space-5); flex-wrap: wrap; }
+
+.resident-complaint-summary {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-5);
+}
+
+.resident-complaint-summary-heading h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  letter-spacing: -0.02em;
+}
+
+.resident-complaint-summary-heading p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.resident-metric-grid {
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.resident-metric-grid .metric {
+  padding: var(--space-4);
+  gap: var(--space-2);
+}
+
+.resident-metric-grid .metric-value {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+}

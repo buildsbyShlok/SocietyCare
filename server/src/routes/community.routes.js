@@ -38,6 +38,7 @@ const visible = (m) => ({
     : m.replyTo,
 });
 router.use(authenticate);
+router.use(require('../middleware/community-society'));
 const throttle = (limit, windowMs) =>
   rateLimit({
     limit,

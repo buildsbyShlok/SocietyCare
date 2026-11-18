@@ -1,0 +1,54 @@
+client/public/fonts/geist-OFL.txt:21: trailing whitespace.
+[32m+[m[32mfonts, including any derivative works, can be bundled, embedded,[m[41m [m
+client/public/fonts/geistmono-OFL.txt:21: trailing whitespace.
+[32m+[m[32mfonts, including any derivative works, can be bundled, embedded,[m[41m [m
+client/public/fonts/inter-OFL.txt:21: trailing whitespace.
+[32m+[m[32mfonts, including any derivative works, can be bundled, embedded,[m[41m [m
+client/src/components/Courtyard.css:99: new blank line at EOF.
+client/src/pages/Auth.css:163: trailing whitespace.
+[32m+[m[41m  [m
+server/prisma/migrations/20261104174000_society_workspace/migration.sql:106: new blank line at EOF.
+server/prisma/migrations/20261105104000_events/migration.sql:22: new blank line at EOF.
+server/prisma/migrations/20261105105000_chat_attachments_replies/migration.sql:10: new blank line at EOF.
+server/prisma/seed.js:102: trailing whitespace.
+[32m+[m[41m  [m
+server/src/services/complaint.service.js:84: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:89: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:94: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:103: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:108: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:113: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:124: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:132: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/complaint.service.js:156: trailing whitespace.
+[32m+[m[41m [m
+server/src/services/scheduler.service.js:13: trailing whitespace.
+[32m+[m[32m *[m[41m [m
+server/src/services/scheduler.service.js:16: trailing whitespace.
+[32m+[m[32m *[m[41m [m
+server/src/services/scheduler.service.js:78: trailing whitespace.
+[32m+[m[41m  [m
+server/src/services/scheduler.service.js:80: trailing whitespace.
+[32m+[m[41m  [m
+server/tests/integration/api.test.js:77: trailing whitespace.
+[32m+[m[41m  [m
+server/tests/integration/api.test.js:202: trailing whitespace.
+[32m+[m[41m    [m
+server/tests/unit/ai.test.js:38: trailing whitespace.
+[32m+[m[41m    [m
+server/tests/unit/auth.test.js:18: trailing whitespace.
+[32m+[m[41m    [m
+server/tests/unit/errors.test.js:29: trailing whitespace.
+[32m+[m[41m    [m
+server/tests/unit/errors.test.js:59: trailing whitespace.
+[32m+[m[41m    [m
+server/tests/unit/errors.test.js:97: trailing whitespace.
+[32m+[m[41m    [m

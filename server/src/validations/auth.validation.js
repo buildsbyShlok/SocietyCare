@@ -28,6 +28,10 @@ function validateRegister(data) {
   if (typeof data.flatNumber === 'string' && data.flatNumber.trim().length > 40) errors.push('Flat number must not exceed 40 characters');
   if (typeof data.password === 'string' && Buffer.byteLength(data.password, 'utf8') > 72) errors.push('Password must not exceed 72 UTF-8 bytes');
   if (data.phone != null && (typeof data.phone !== 'string' || data.phone.length > 30)) errors.push('Phone must be text up to 30 characters');
+  if (['societyId','disabled','enrollmentPending'].some(key => key in data))
+    errors.push('Account access fields cannot be set at registration');
+  if (data.qrToken !== undefined && (typeof data.qrToken !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(data.qrToken)))
+    errors.push('Invalid equipment label');
   if (data.role && data.role !== ROLES.RESIDENT) {
     errors.push('Registration should never allow selecting ADMIN');
   }

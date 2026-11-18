@@ -43,21 +43,21 @@ test('Integration Tests — REST API Endpoints', async (t) => {
 
   t.beforeEach(() => {
     prisma.user.findUnique = async ({ where }) => where.id === 'adm_123'
-      ? { id: 'adm_123', role: 'ADMIN' }
-      : where.id === 'res_123' ? { id: 'res_123', role: 'RESIDENT' } : null;
+      ? { id: 'adm_123', societyId: 1, role: 'ADMIN' }
+      : where.id === 'res_123' ? { id: 'res_123', societyId: 1, role: 'RESIDENT' } : null;
   });
 
   // Generate tokens for request auth
   const residentToken = jwt.sign(
-    { id: 'res_123', email: 'resident@society.com', role: 'RESIDENT' },
+    { id: 'res_123', email: 'resident@society.com', societyId: 1, role: 'RESIDENT' },
     process.env.JWT_SECRET
   );
   const adminToken = jwt.sign(
-    { id: 'adm_123', email: 'admin@society.com', role: 'ADMIN' },
+    { id: 'adm_123', email: 'admin@society.com', societyId: 1, role: 'ADMIN' },
     process.env.JWT_SECRET
   );
   const invalidToken = jwt.sign(
-    { id: 'bad_123', role: 'RESIDENT' },
+    { id: 'bad_123', societyId: 1, role: 'RESIDENT' },
     'incorrect-secret-key'
   );
 
@@ -84,14 +84,19 @@ test('Integration Tests — REST API Endpoints', async (t) => {
       id: 'res_999',
       name: 'New Resident',
       email: 'newres@society.com',
-      role: 'RESIDENT',
+      societyId: 1, role: 'RESIDENT',
       flatNumber: 'C-302',
       createdAt: new Date(),
     };
 
     // Directly assign stub implementations
     prisma.user.findUnique = async () => null;
-    prisma.user.create = async () => mockCreatedUser;
+    prisma.user.create = async ({data}) => {
+      assert.equal(data.role, 'RESIDENT');
+      assert.equal(data.disabled, true);
+      assert.equal(data.enrollmentPending, true);
+      return mockCreatedUser;
+    };
 
     const res = await request(app)
       .post('/api/auth/register')
@@ -100,13 +105,13 @@ test('Integration Tests — REST API Endpoints', async (t) => {
         email: 'newres@society.com',
         password: 'password123',
         flatNumber: 'C-302',
-        role: 'RESIDENT', // Registration forces RESIDENT anyway, so passing RESIDENT aligns with schema validation rules
+        role: 'RESIDENT',
       });
 
     assert.strictEqual(res.status, 201);
     assert.ok(res.body.message);
-    assert.ok(res.body.token);
-    assert.strictEqual(res.body.user.role, 'RESIDENT');
+    assert.equal(res.body.token, undefined);
+    assert.equal(res.body.user, undefined);
   });
 
   await t.test('POST /api/auth/login — should authenticate and return JWT token', async () => {
@@ -116,7 +121,7 @@ test('Integration Tests — REST API Endpoints', async (t) => {
       name: 'Resident User',
       email: 'resident@society.com',
       password: hashedPassword,
-      role: 'RESIDENT',
+      societyId: 1, role: 'RESIDENT',
       flatNumber: 'A-101',
     };
 

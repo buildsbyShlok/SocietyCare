@@ -12,6 +12,13 @@ const VALID_PRIORITIES = Object.values(PRIORITY);
  */
 function validateCreateComplaint(data) {
   const errors = [];
+  const qr = data.qrToken !== undefined;
+  if (qr && (typeof data.qrToken !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(data.qrToken)))
+    errors.push('Invalid QR token. Scan the equipment label again.');
+  if (qr && Object.keys(data).some(key => !['qrToken', 'title', 'description', 'priority'].includes(key)))
+    errors.push('QR reports accept only the token, issue title, description and priority.');
+  if (!qr && ['assetId', 'source', 'societyId', 'residentId', 'userId'].some(key => key in data))
+    errors.push('The reporting identity, source and asset cannot be supplied manually.');
 
   if (typeof data.title !== 'string' || data.title.trim().length < 5) {
     errors.push('Title must be at least 5 characters');
@@ -29,7 +36,7 @@ function validateCreateComplaint(data) {
     errors.push('Description must not exceed 2000 characters');
   }
 
-  if (!data.category || !VALID_CATEGORIES.includes(data.category)) {
+  if (!qr && (!data.category || !VALID_CATEGORIES.includes(data.category))) {
     errors.push(`Category must be one of: ${VALID_CATEGORIES.join(', ')}`);
   }
 

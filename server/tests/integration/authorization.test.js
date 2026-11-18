@@ -11,9 +11,9 @@ const token = (id, role) => jwt.sign({ id, role }, process.env.JWT_SECRET, { exp
 
 test('Current database identity, complaint access and role changes', async (t) => {
   const accounts = new Map([
-    ['manager', { id: 'manager', role: 'ADMIN' }],
-    ['target', { id: 'target', role: 'ADMIN' }],
-    ['resident', { id: 'resident', role: 'RESIDENT' }],
+    ['manager', { id: 'manager', societyId: 1, role: 'ADMIN' }],
+    ['target', { id: 'target', societyId: 1, role: 'ADMIN' }],
+    ['resident', { id: 'resident', societyId: 1, role: 'RESIDENT' }],
   ]);
   const original = { transaction: prisma.$transaction, raw: prisma.$queryRaw, count: prisma.user.count, find: prisma.user.findUnique, update: prisma.user.update, list: prisma.user.findMany, complaint: prisma.complaint.findUnique };
   t.after(() => {
@@ -51,14 +51,14 @@ test('Current database identity, complaint access and role changes', async (t) =
     }
   });
   await t.test('demotion through role endpoint immediately rejects old admin token', async () => {
-    assert.equal((await request(app).patch('/api/users/target/role').auth(managerToken, { type: 'bearer' }).send({ role: 'RESIDENT' })).status, 200);
+    assert.equal((await request(app).patch('/api/users/target/role').auth(managerToken, { type: 'bearer' }).send({ societyId: 1, role: 'RESIDENT' })).status, 200);
     assert.equal((await get('/api/users', oldAdminToken)).status, 403);
     assert.equal((await get('/api/complaints/ticket', oldAdminToken)).status, 403);
     assert.equal((await request(app).patch('/api/complaints/ticket/status').auth(oldAdminToken, { type: 'bearer' }).send({ status: 'RESOLVED', remark: 'Denied' })).status, 403);
     assert.equal((await get('/api/auth/me', oldAdminToken)).body.user.role, 'RESIDENT');
   });
   await t.test('promotion works with old resident token', async () => {
-    assert.equal((await request(app).patch('/api/users/resident/role').auth(managerToken, { type: 'bearer' }).send({ role: 'ADMIN' })).status, 200);
+    assert.equal((await request(app).patch('/api/users/resident/role').auth(managerToken, { type: 'bearer' }).send({ societyId: 1, role: 'ADMIN' })).status, 200);
     assert.equal((await get('/api/users', residentToken)).status, 200);
   });
   await t.test('missing complaint is 404', async () => {
@@ -70,7 +70,7 @@ test('Current database identity, complaint access and role changes', async (t) =
     assert.equal((await get('/api/auth/me', oldAdminToken)).status, 401);
   });
   await t.test('malformed signed identity is rejected before database query', async () => {
-    const bad = jwt.sign({ role: 'ADMIN' }, process.env.JWT_SECRET);
+    const bad = jwt.sign({ societyId: 1, role: 'ADMIN' }, process.env.JWT_SECRET);
     assert.equal((await get('/api/users', bad)).status, 401);
   });
   await t.test('database failure fails closed', async () => {
@@ -82,7 +82,7 @@ test('Current database identity, complaint access and role changes', async (t) =
 test('Login/register protection does not lock out session restoration or logout', async (t) => {
   const original = prisma.user.findUnique;
   const password = await bcrypt.hash('Test-only-password-123', 4);
-  prisma.user.findUnique = async () => ({ id: 'resident', role: 'RESIDENT', password });
+  prisma.user.findUnique = async () => ({ id: 'resident', societyId: 1, role: 'RESIDENT', password });
   t.after(() => { prisma.user.findUnique = original; });
   const residentToken = token('resident', 'RESIDENT');
   for (let i = 0; i < 20; i++) {

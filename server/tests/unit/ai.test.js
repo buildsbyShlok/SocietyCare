@@ -29,7 +29,7 @@ test('Unit Tests — AI Service (analyzeComplaint & detectDuplicates)', async (t
     process.env.GROQ_API_KEY = 'test-groq-key';
     prisma.complaint.findMany = async () => [];
 
-    const matches = await aiService.detectDuplicates('New dripping faucet leak.');
+    const matches = await aiService.detectDuplicates('New dripping faucet leak.', { id: 'test-admin', role: 'ADMIN', societyId: 1 });
     assert.deepStrictEqual(matches, []);
   });
 
@@ -55,7 +55,7 @@ test('Unit Tests — AI Service (analyzeComplaint & detectDuplicates)', async (t
       })
     });
 
-    const matches = await aiService.detectDuplicates('Dripping pipe behind basin.');
+    const matches = await aiService.detectDuplicates('Dripping pipe behind basin.', { id: 'test-admin', role: 'ADMIN', societyId: 1 });
     assert.strictEqual(matches.length, 1);
     assert.strictEqual(matches[0].complaintId, '1');
     assert.strictEqual(matches[0].similarity, 90);
@@ -74,7 +74,7 @@ test('Unit Tests — AI Service (analyzeComplaint & detectDuplicates)', async (t
     delete process.env.GROQ_API_KEY;
 
     await assert.rejects(
-      async () => { await aiService.detectDuplicates('Water leak'); },
+      async () => { await aiService.detectDuplicates('Water leak', { id: 'test-admin', role: 'ADMIN', societyId: 1 }); },
       (err) => err instanceof ApiError && err.statusCode === 503
     );
   });

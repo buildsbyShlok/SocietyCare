@@ -10,10 +10,13 @@ RUN npm ci
 COPY . .
 
 # Pass VITE_API_URL during build time so Vite embeds it into the bundles
+ARG VITE_PUBLIC_FRONTEND_URL
+ENV VITE_PUBLIC_FRONTEND_URL=$VITE_PUBLIC_FRONTEND_URL
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 
-RUN npm run build
+ARG VITE_BUILD_MODE=production
+RUN npm run build -- --mode "$VITE_BUILD_MODE"
 
 # Production stage
 FROM nginx:stable-alpine

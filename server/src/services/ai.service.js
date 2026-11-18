@@ -316,7 +316,7 @@ async function detectDuplicates(newComplaintText, user) {
 
   const existing = await prisma.complaint.findMany({
     where: {
-      ...(user?.role === 'RESIDENT' ? { residentId: user.id } : {}),
+      ...require('../utils/society-scope').complaintScope(user),
       archivedAt:null,
       deletedAt:null,
       status:    { in: [STATUS.OPEN, STATUS.IN_PROGRESS] },

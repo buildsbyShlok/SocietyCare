@@ -37,8 +37,8 @@ test('Integration Tests — Bulletin Board notices', async (t) => {
 
   t.beforeEach(() => {
     prisma.user.findUnique = async ({ where }) => where.id === 'adm_123'
-      ? { id: 'adm_123', role: 'ADMIN' }
-      : where.id === 'res_123' ? { id: 'res_123', role: 'RESIDENT' } : null;
+      ? { id: 'adm_123', role: 'ADMIN', societyId: 1 }
+      : where.id === 'res_123' ? { id: 'res_123', role: 'RESIDENT', societyId: 1 } : null;
   });
 
   // Generate tokens

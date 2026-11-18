@@ -9,6 +9,14 @@ function load(file) {
   const mod=new Module(filename,module);mod.paths=module.paths;mod._compile(code,filename);return mod.exports;
 }
 async function run(){
+  const {safeReportReturn,reportAuthPath}=load('src/utils/report-return.js');
+  const report='/report/'+'q'.repeat(43)+'?from=label#issue';
+  assert.equal(safeReportReturn(report),report);
+  assert.equal(safeReportReturn('/report/asset/'+'q'.repeat(43)),'/report/asset/'+'q'.repeat(43));
+  for(const value of [null,undefined,'https://evil.test','//evil.test','/\\evil.test','/report/short','/login','/report/'+'q'.repeat(43)+'/../login','/report/%2f%2fevil.test']) assert.equal(safeReportReturn(value),'/');
+  const login=reportAuthPath('/login',report);assert.equal(new URLSearchParams(login.split('?')[1]).get('returnTo'),report);
+  assert.equal(reportAuthPath('/register','https://evil.test'),'/register');
+  console.log('PASS QR return destination preservation across login/register, legacy QR paths, and open-redirect rejection');
   // Directory actions are tested first, including the exact helpers invoked by its buttons.
   const {performResidentAction:act}=load('src/pages/resident-actions.js');
   let calls=[], confirmations=[];

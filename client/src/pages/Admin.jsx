@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Building2, Megaphone, MessagesSquare, Users, Boxes } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Load, Section, Row, useResource } from '../components/Workspace';
+import { Load, useResource } from '../components/Workspace';
 import { request } from '../api';
+import './Admin.css';
+
 const tools = [
-  ['Resident directory', 'Profiles, unit details and access', '/settings/users'],
-  ['Complaint management', 'Review tickets and archive resolved work', '/complaints'],
-  ['Notice management', 'Publish and pin announcements', '/notices'],
-  ['Maintenance ledger', 'Issue invoices and verify payments', '/billing'],
-  ['Community moderation', 'Review reports and remove messages', '/community?view=reports'],
+  { title: 'Resident directory', detail: 'Profiles, unit details and account access', to: '/settings/users', icon: Users },
+  { title: 'Asset management', detail: 'Equipment records, QR labels and reporting history', to: '/assets', icon: Boxes },
+  { title: 'Notice board', detail: 'Publish, pin and maintain society announcements', to: '/notices', icon: Megaphone },
+  { title: 'Community moderation', detail: 'Review reports and manage community messages', to: '/community?view=reports', icon: MessagesSquare },
 ];
 export default function Admin() {
   const { token } = useAuth(),
     [rev, setRev] = useState(0),
     [busy, setBusy] = useState(false),
-    [feedback, setFeedback] = useState(''),
-    [page, setPage] = useState(1);
-  const society = useResource('/society', rev),
-    archived = useResource('/complaints?archived=true&page=' + page);
+    [feedback, setFeedback] = useState('');
+  const society = useResource('/society', rev);
   async function save(e) {
     e.preventDefault();
     const body = Object.fromEntries(new FormData(e.currentTarget));
@@ -34,47 +34,30 @@ export default function Admin() {
     }
   }
   return (
-    <div className="page ws-page">
-      <div className="ws-kicker">SOCIETYCARE / ADMINISTRATION</div>
-      <h1>Admin management</h1>
-      <div className="ws-columns">
+    <div className="page ws-page admin-page">
+      <header className="admin-page-heading">
         <div>
-          <Section title="Management tools">
-            {tools.map(([title, detail, to]) => (
-              <Row key={to} to={to} title={title} detail={detail} />
-            ))}
-          </Section>
-          <Section title="Complaint archive">
-            <Load source={archived}>
-              {(data) => (
-                <>
-                  {data.items.length ? (
-                    data.items.map((c) => (
-                      <Row
-                        key={c.id}
-                        to={'/complaints/' + c.id}
-                        title={c.title}
-                        detail={c.resident?.name || "Deleted account"}
-                      />
-                    ))
-                  ) : (
-                    <p>No archived complaints.</p>
-                  )}
-                  <div className="ws-inline">
-                    {data.hasPreviousPage && (
-                      <button onClick={() => setPage(page - 1)}>Previous</button>
-                    )}
-                    {data.hasNextPage && <button onClick={() => setPage(page + 1)}>Next</button>}
-                  </div>
-                </>
-              )}
-            </Load>
-          </Section>
+          <h1>Admin management</h1>
+          <p>Manage people, communications and shared society information.</p>
         </div>
-        <Section title="Society information">
+      </header>
+      <div className="admin-layout">
+        <section className="admin-tools" aria-labelledby="admin-tools-heading">
+          <h2 id="admin-tools-heading">Management areas</h2>
+          <div className="admin-tool-list">
+            {tools.map(({ title, detail, to, icon: Icon }) => (
+              <Link key={to} to={to} className="admin-tool-row">
+                <Icon size={19} aria-hidden="true" />
+                <span><strong>{title}</strong><small>{detail}</small></span>
+              </Link>
+            ))}
+          </div>
+        </section>
+        <section className="admin-society-panel" aria-labelledby="society-information-heading">
+          <header><Building2 size={19} aria-hidden="true" /><div><h2 id="society-information-heading">Society information</h2><p>Only administrators can update these shared details.</p></div></header>
           <Load source={society}>
             {({ society: s }) => (
-              <form className="ws-form" onSubmit={save}>
+              <form className="ws-form admin-society-form" onSubmit={save}>
                 <label>
                   Society name
                   <input name="name" maxLength={100} required defaultValue={s?.name} />
@@ -97,24 +80,8 @@ export default function Admin() {
                     defaultValue={s?.totalFlats}
                   />
                 </label>
-                <label>
-                  Next maintenance
-                  <textarea
-                    name="upcomingMaintenance"
-                    maxLength={500}
-                    defaultValue={s?.upcomingMaintenance}
-                  />
-                </label>
-                <label>
-                  Scheduled date
-                  <input
-                    type="date"
-                    name="maintenanceDate"
-                    defaultValue={s?.maintenanceDate?.slice(0, 10)}
-                  />
-                </label>
                 <button className="btn btn-primary" disabled={busy}>
-                  Save society information
+                  {busy ? 'Saving…' : 'Save society information'}
                 </button>
               </form>
             )}
@@ -124,7 +91,7 @@ export default function Admin() {
               {feedback}
             </p>
           )}
-        </Section>
+        </section>
       </div>
     </div>
   );

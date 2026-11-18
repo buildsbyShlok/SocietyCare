@@ -21,19 +21,7 @@ function signToken(payload) {
 
 // ─── Service Functions ────────────────────────────────────────────────────────
 
-/**
- * Registers a new user account.
- *
- * Steps:
- *   1. Normalize and check email uniqueness
- *   2. Hash the password (bcrypt, cost factor from constants)
- *   3. Create user record — Prisma `select` ensures password is never returned
- *   4. Sign and return JWT with the new user object
- *
- * @param {object} data - Validated body from validateRegister
- * @returns {{ message: string, token: string, user: object }}
- * @throws {ApiError} 409 — email already registered
- */
+/** Create a disabled resident pending review by their society administrator. */
 async function registerUser(data) {
   const { name, email, password, flatNumber, phone } = data;
 
@@ -49,34 +37,29 @@ async function registerUser(data) {
 
   const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-  let user;
-  try { user = await prisma.user.create({
-    data: {
-      name: name.trim(),
-      email: normalizedEmail,
-      password: hashedPassword,
-      role: 'RESIDENT',
-      flatNumber: flatNumber.trim(),
-      phone: phone?.trim() || null,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      flatNumber: true,
-      phone: true,
-      createdAt: true,
-    },
-  });
+  // Public requests go to the original society unless an active equipment label
+  // identifies another one. The label only selects the reviewing administrator.
+  let societyId = 1;
+  if (data.qrToken !== undefined) {
+    const asset = await prisma.asset.findUnique({ where: { qrToken: data.qrToken }, select: { status: true, societyId: true } });
+    if (!asset || asset.status !== 'ACTIVE') throw new ApiError(400, 'This equipment label is unavailable.');
+    societyId = asset.societyId;
+  }
 
+  try {
+    await prisma.user.create({
+      data: {
+        name: name.trim(), email: normalizedEmail, password: hashedPassword,
+        role: 'RESIDENT', disabled: true, enrollmentPending: true, societyId,
+        flatNumber: flatNumber.trim(), phone: phone?.trim() || null,
+      },
+      select: { id: true },
+    });
   } catch (error) {
     if (error.code === 'P2002') throw new ApiError(409, 'An account with this email already exists');
     throw error;
   }
-  const token = signToken({ id: user.id, role: user.role });
-
-  return { message: 'Account created successfully', token, user };
+  return { message: 'Enrollment requested. Sign in after your society administrator verifies your residency.' };
 }
 
 /**

@@ -17,9 +17,9 @@ test("Complaint soft deletion respects current identity and preserves audit", as
     prisma.complaint.updateMany = original.update;
   });
   const accounts = {
-    owner: { id: "owner", role: "RESIDENT" },
-    other: { id: "other", role: "RESIDENT" },
-    admin: { id: "admin", role: "ADMIN" },
+    owner: { id: "owner", societyId: 1, role: "RESIDENT" },
+    other: { id: "other", societyId: 1, role: "RESIDENT" },
+    admin: { id: "admin", societyId: 1, role: "ADMIN" },
   };
   const records = {
     owned: {

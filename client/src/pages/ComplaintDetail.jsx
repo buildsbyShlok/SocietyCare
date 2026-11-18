@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { complaints as complaintsApi } from "../api/index";
 import { useAuth } from "../context/AuthContext";
+import ComplaintSource from '../components/ComplaintSource';
 import {
   ROLES,
   STATUS_LABELS,
@@ -529,6 +530,16 @@ export default function ComplaintDetail() {
 
         {/* Right Side (30%) - Properties & State Transitions Form */}
         <aside className="complaint-detail-sidebar">
+          {isAdmin && <section className="card workspace-panel linked-equipment" aria-label="Complaint origin and equipment">
+            <h2 className="panel-title">Complaint origin</h2>
+            <ComplaintSource source={complaint.source} />
+            {complaint.asset ? <dl>
+              <div><dt>Asset</dt><dd><Link to={'/assets/' + complaint.asset.id}>{complaint.asset.name}</Link></dd></div>
+              <div><dt>Asset code</dt><dd>{complaint.asset.assetCode}</dd></div>
+              <div><dt>Equipment category</dt><dd>{complaint.asset.category}</dd></div>
+              <div><dt>Location</dt><dd>{complaint.asset.location}</dd></div>
+            </dl> : <p className="ws-muted">Not linked to an asset</p>}
+          </section>}
           {/* Issue Properties Panel */}
           <div className="card workspace-panel">
             <h2 className="panel-title">

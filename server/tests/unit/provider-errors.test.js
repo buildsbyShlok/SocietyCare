@@ -59,7 +59,7 @@ test('Groq request bounds, safe errors and model fallback', async t => {
       return [{ id: 'known', title: 'Garden tap', description: 'A leaking tap' }];
     };
     t.mock.method(global, 'fetch', async () => response({ matches: [null, { complaintId: 'unknown', similarity: 99 }, { complaintId: 'known', similarity: 95 }, { complaintId: 'known', similarity: 90 }] }));
-    const results = await ai.detectDuplicates('Garden tap leaking.');
+    const results = await ai.detectDuplicates('Garden tap leaking.', { id: 'test-admin', role: 'ADMIN', societyId: 1 });
     assert.equal(results.length, 1);
     assert.equal(results[0].complaintId, 'known');
   });
@@ -68,7 +68,7 @@ test('Groq request bounds, safe errors and model fallback', async t => {
     t.after(() => { prisma.complaint.findMany = original; });
     prisma.complaint.findMany = async () => [{ id: 'known', title: 'Tap', description: 'Tap leak' }];
     t.mock.method(global, 'fetch', async () => response(null));
-    await assert.rejects(ai.detectDuplicates('Garden tap leaking.'), e => e.statusCode === 422);
+    await assert.rejects(ai.detectDuplicates('Garden tap leaking.', { id: 'test-admin', role: 'ADMIN', societyId: 1 }), e => e.statusCode === 422);
   });
 });
 

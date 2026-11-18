@@ -12,11 +12,18 @@ import {
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
+  ClipboardList,
+  CircleDot,
+  Clock3,
+  CircleCheck,
 } from 'lucide-react';
 import { complaints as complaintsApi } from '../api/index';
 import { useAuth } from '../context/AuthContext';
 import { ROLES, CATEGORY_LABELS } from '../utils/constants';
 import ComplaintCard from '../components/ComplaintCard';
+import AssetFilter from '../components/AssetFilter';
+import Metric from '../components/Metric';
+import { Load, useResource } from '../components/Workspace';
 import './Complaints.css';
 
 const STATUS_TABS = [
@@ -32,6 +39,7 @@ const STATUS_TABS = [
 export default function Complaints() {
   const { user, token } = useAuth();
   const isAdmin = user?.role === ROLES.ADMIN;
+  const residentStats = useResource(isAdmin ? null : '/dashboard');
   const [searchParams, setSearchParams] = useSearchParams();
   const archived = searchParams.get('archived') === 'true';
 
@@ -47,20 +55,27 @@ export default function Complaints() {
   const [hasPreviousPage, setHasPreviousPage] = useState(false);
 
   // Filter state
-  const [statusFilter, setStatusFilter] = useState('');
+  const statusFilter = searchParams.get('status') || '';
+  const sourceFilter = isAdmin ? searchParams.get('source') || '' : '';
+  const assetFilter = isAdmin ? searchParams.get('assetId') || '' : '';
+  function setQuery(key, value) {
+    setPage(1);
+    setSearchParams(previous => { const next = new URLSearchParams(previous); value ? next.set(key, value) : next.delete(key); return next; });
+  }
+  const setStatusFilter = value => setQuery('status', value);
   const [categoryFilter, setCategoryFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [searchFilter, setSearchFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
 
   const hasActiveFilters = Boolean(
-    statusFilter || categoryFilter || priorityFilter || searchFilter || dateFilter
+    statusFilter || categoryFilter || priorityFilter || searchFilter || dateFilter || sourceFilter || assetFilter
   );
 
   // Reset to first page when any search filter is updated
   useEffect(() => {
     setPage(1);
-  }, [statusFilter, categoryFilter, priorityFilter, searchFilter, dateFilter, archived]);
+  }, [statusFilter, categoryFilter, priorityFilter, searchFilter, dateFilter, archived, sourceFilter, assetFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +90,8 @@ export default function Complaints() {
         if (priorityFilter) params.priority = priorityFilter;
         if (searchFilter) params.search = searchFilter;
         if (isAdmin && dateFilter) params.date = dateFilter;
+        if (sourceFilter) params.source = sourceFilter;
+        if (assetFilter) params.assetId = assetFilter;
 
         const data = await complaintsApi.list(params, token);
         if (cancelled) return;
@@ -92,10 +109,10 @@ export default function Complaints() {
 
     fetchComplaints();
     return () => { cancelled = true; };
-  }, [statusFilter, categoryFilter, priorityFilter, searchFilter, dateFilter, page, token, isAdmin, archived]);
+  }, [statusFilter, categoryFilter, priorityFilter, searchFilter, dateFilter, page, token, isAdmin, archived, sourceFilter, assetFilter]);
 
   function clearFilters() {
-    setStatusFilter('');
+    setSearchParams(archived ? { archived: 'true' } : {});
     setCategoryFilter('');
     setPriorityFilter('');
     setSearchFilter('');
@@ -125,11 +142,32 @@ export default function Complaints() {
         </div>
       </header>
 
+      {!isAdmin && (
+        <Load source={residentStats}>
+          {(stats) => (
+            <section className="resident-complaint-summary" aria-labelledby="complaint-summary-heading">
+              <div className="resident-complaint-summary-heading">
+                <div>
+                  <h2 id="complaint-summary-heading">Your complaint summary</h2>
+                  <p>Track every active request without leaving this board.</p>
+                </div>
+              </div>
+              <div className="metric-grid resident-metric-grid">
+                <Metric label="Total" value={stats.totalComplaints} icon={ClipboardList} note="Active requests" />
+                <Metric label="Open" value={stats.byStatus.OPEN} icon={CircleDot} tone="open" note="Awaiting review" />
+                <Metric label="In progress" value={stats.byStatus.IN_PROGRESS} icon={Clock3} tone="progress" note="Being worked on" />
+                <Metric label="Resolved" value={stats.byStatus.RESOLVED} icon={CircleCheck} tone="success" note="Completed requests" />
+              </div>
+            </section>
+          )}
+        </Load>
+      )}
+
       <div className="workspace-actions complaint-lifecycle-filter" role="group" aria-label="Complaint lifecycle">
         {[false, true].map(value => (
           <button key={String(value)} type="button" aria-pressed={archived === value}
             className={'btn btn-sm ' + (archived === value ? 'btn-primary' : 'btn-secondary')}
-            onClick={() => { setPage(1); setSearchParams(value ? { archived: 'true' } : {}); }}>
+            onClick={() => setQuery('archived', value ? 'true' : '')}>
             {value ? 'Archived complaints' : 'Active complaints'}
           </button>
         ))}
@@ -185,6 +223,10 @@ export default function Complaints() {
         </div>
 
         <div className="toolbar-dropdowns">
+          {isAdmin && <>
+            <select className="toolbar-select" aria-label="Filter by complaint source" value={sourceFilter} onChange={event => setQuery('source', event.target.value)}><option value="">All complaints</option><option value="QR">QR complaints</option><option value="MANUAL">Manual complaints</option></select>
+            <AssetFilter value={assetFilter} onChange={value => setQuery('assetId', value)} />
+          </>}
           <div className="toolbar-select-wrap">
             <select
               className="toolbar-select"
@@ -246,7 +288,7 @@ export default function Complaints() {
       <div className="complaints-meta-bar">
         <span className="complaints-count-text">
           Showing <strong className="text-primary">{complaints.length}</strong> of{' '}
-          <strong className="text-primary">{totalItems}</strong> ticket
+          <strong className="text-primary">{totalItems}</strong> Issue
           {totalItems !== 1 ? 's' : ''}
         </span>
       </div>
@@ -311,7 +353,7 @@ export default function Complaints() {
         <>
           <div className="complaints-list-container">
             {complaints.map((complaint, index) => (
-              <ComplaintCard key={complaint.id} complaint={complaint} index={index} />
+              <ComplaintCard key={complaint.id} complaint={complaint} index={index} showAsset={isAdmin} />
             ))}
           </div>
 

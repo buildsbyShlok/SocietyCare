@@ -13,8 +13,8 @@ test('Account controls reauthorize under lock and preserve the final admin', asy
   let writes=0, lockHeld=false, forcedCount=null, beforeLock;
   const reset=()=>{
     accounts.clear();
-    accounts.set('actor',{id:'actor',role:'ADMIN',disabled:false});
-    accounts.set('target',{id:'target',role:'RESIDENT',disabled:false});
+    accounts.set('actor',{id:'actor',role:'ADMIN',disabled:false,societyId:1});
+    accounts.set('target',{id:'target',role:'RESIDENT',disabled:false,societyId:1});
     writes=0; forcedCount=null; beforeLock=null;
   };
   prisma.$transaction=async work=> {try {return await work(prisma);}finally {lockHeld=false;}};
@@ -26,7 +26,7 @@ test('Account controls reauthorize under lock and preserve the final admin', asy
   };
   prisma.user.findUnique=async ({where})=>{assert.equal(lockHeld,true,'account is loaded after acquiring the lock');return accounts.get(where.id)||null;};
   prisma.user.count=async ({where})=>{
-    assert.deepEqual(where,{role:'ADMIN',disabled:false});
+    assert.deepEqual(where,{role:'ADMIN',disabled:false,societyId:1});
     return forcedCount ?? [...accounts.values()].filter(u=>u.role==='ADMIN'&&!u.disabled).length;
   };
   prisma.user.update=async ({where,data})=>{writes++;Object.assign(accounts.get(where.id),data);return accounts.get(where.id);};
@@ -51,6 +51,12 @@ test('Account controls reauthorize under lock and preserve the final admin', asy
     reset();
     await assert.rejects(updateUserRole('actor','RESIDENT','actor'),{statusCode:400});
     await assert.rejects(deleteUser('actor','actor'),{statusCode:400});
+    assert.equal(writes,0);
+  });
+  await t.test('another society account cannot be changed',async()=>{
+    reset(); accounts.get('target').societyId=2;
+    await assert.rejects(updateUserRole('target','ADMIN','actor'),{statusCode:404});
+    await assert.rejects(deleteUser('target','actor'),{statusCode:404});
     assert.equal(writes,0);
   });
   await t.test('final-admin count blocks both demotion and deletion',async()=>{

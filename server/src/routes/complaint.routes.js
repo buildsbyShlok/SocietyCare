@@ -16,6 +16,11 @@ const {
 const { ROLES } = require("../utils/constants");
 
 const router = Router();
+const qrSubmissionLimit = require('express-rate-limit')({
+  windowMs: 10 * 60 * 1000, limit: 10, keyGenerator: req => req.user.id,
+  standardHeaders: true, legacyHeaders: false,
+  message: { message: 'Too many QR reports. Please wait a few minutes before submitting another.' },
+});
 
 // All complaint routes require authentication
 router.use(authenticate);
@@ -24,6 +29,7 @@ router.post(
   "/",
   authorize(ROLES.RESIDENT),
   upload.single("photo"),
+  (req, res, next) => req.body?.qrToken !== undefined ? qrSubmissionLimit(req, res, next) : next(),
   validate(validateCreateComplaint),
   create,
 );

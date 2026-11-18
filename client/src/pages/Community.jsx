@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Send, ImagePlus, Reply, X, Users } from "lucide-react";
+import { Send, ImagePlus, Reply, X, Users, Info, ShieldCheck, Image } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { request } from "../api";
 import { formatDateTime } from "../utils/helpers";
+import "./Community.css";
 
 export default function Community() {
   const { token, user } = useAuth(),
@@ -126,7 +127,7 @@ export default function Community() {
         </div>
         <div>
           <h1>{queue ? "Community moderation" : "Society conversation"}</h1>
-          <p>Your neighbourhood, in conversation</p>
+          <p>{queue ? "Review reports and keep the group welcoming" : "A private group for authenticated society members · updates automatically"}</p>
         </div>
         <div className="ws-inline">
           <Link to="/notices">Notice board</Link>
@@ -140,6 +141,7 @@ export default function Community() {
           )}
         </div>
       </header>
+      <div className="chat-layout">
       <div className="chat-shell">
         <div
           className="chat-feed"
@@ -409,6 +411,17 @@ export default function Community() {
             </div>
           </form>
         )}
+      </div>
+      {!queue && <aside className="chat-details" aria-labelledby="chat-details-heading">
+        <div className="chat-details-icon"><Users size={20} aria-hidden="true" /></div>
+        <h2 id="chat-details-heading">About this group</h2>
+        <p>Share practical local updates, ask neighbours for help and keep conversation respectful.</p>
+        <dl>
+          <div><dt><ShieldCheck size={14} aria-hidden="true" />Membership</dt><dd>Authenticated society residents and administrators</dd></div>
+          <div><dt><Image size={14} aria-hidden="true" />Attachments</dt><dd>JPEG, PNG and WebP images up to 5 MB</dd></div>
+          <div><dt><Info size={14} aria-hidden="true" />Moderation</dt><dd>Report a message when it needs administrator review</dd></div>
+        </dl>
+      </aside>}
       </div>
       {feedback && (
         <p role="status" className="ws-feedback">

@@ -93,7 +93,7 @@ test('Unit Tests — Platform Failures & Error Boundaries', async (t) => {
     prisma.$transaction = async work => work(prisma);
     prisma.$queryRaw = async () => [{locked:1}];
     // Mock user exists check
-    prisma.user.findUnique = async ({where}) => ({ id: where.id, role: where.id === 'admin123' ? 'ADMIN' : 'RESIDENT' });
+    prisma.user.findUnique = async ({where}) => ({ id: where.id, societyId: 1, role: where.id === 'admin123' ? 'ADMIN' : 'RESIDENT' });
     
     prisma.user.update = async () => {
       throw new Error('Database connection reset');

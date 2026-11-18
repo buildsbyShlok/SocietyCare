@@ -1,5 +1,6 @@
 const prisma = require('../config/db');
 const { ROLES } = require('../utils/constants');
+const { societyScope, complaintScope } = require('../utils/society-scope');
 
 // ─── Private Helpers ──────────────────────────────────────────────────────────
 
@@ -42,8 +43,8 @@ function toCategoryMap(rows) {
  * @param {string} userId
  * @returns {{ role, totalComplaints, byStatus, byCategory }}
  */
-async function getResidentStats(userId) {
-  const where = { residentId: userId, archivedAt:null, deletedAt:null };
+async function getResidentStats(user) {
+  const where = { ...complaintScope(user), archivedAt:null, deletedAt:null };
 
   const [statusRows, categoryRows, total] = await Promise.all([
     prisma.complaint.groupBy({
@@ -77,32 +78,32 @@ async function getResidentStats(userId) {
  *
  * @returns {{ role, totalComplaints, byStatus, byCategory, overdueCount }}
  */
-async function getAdminStats() {
-  const [statusRows, categoryRows, total, overdueCount] = await Promise.all([
-    prisma.complaint.groupBy({
-      by: ['status'],
-      where: {archivedAt:null, deletedAt:null},
-      _count: { status: true },
-    }),
-    prisma.complaint.groupBy({
-      by: ['category'],
-      where: {archivedAt:null, deletedAt:null},
-      _count: { category: true },
-    }),
-    prisma.complaint.count({where:{archivedAt:null, deletedAt:null}}),
-    prisma.complaint.count({
-      where: {
-        isOverdue: true, archivedAt:null, deletedAt:null,
-      },
-    }),
+async function getAdminStats(user) {
+  const scope = societyScope(user), where = { ...scope, archivedAt: null, deletedAt: null };
+  const linked = { ...where, assetId: { not: null }, asset: scope };
+  const [groups, overdueCount, assetGroups, openAssetComplaints, frequent] = await Promise.all([
+    prisma.complaint.groupBy({ by: ['status', 'category', 'source'], where, _count: { _all: true } }),
+    prisma.complaint.count({ where: { ...where, isOverdue: true } }),
+    prisma.asset.groupBy({ by: ['status'], where: scope, _count: { status: true } }),
+    prisma.complaint.count({ where: { ...linked, status: 'OPEN' } }),
+    prisma.complaint.groupBy({ by: ['assetId'], where: linked, _count: { assetId: true }, orderBy: [{ _count: { assetId: 'desc' } }, { assetId: 'asc' }], take: 5 }),
   ]);
-
+  const byStatus = toStatusMap([]), byCategory = toCategoryMap([]);
+  let totalComplaints = 0, qrComplaints = 0;
+  for (const row of groups) {
+    const count = row._count._all;
+    totalComplaints += count; byStatus[row.status] += count; byCategory[row.category] += count;
+    if (row.source === 'QR') qrComplaints += count;
+  }
+  const assetStatus = { ACTIVE: 0, INACTIVE: 0 };
+  for (const row of assetGroups) assetStatus[row.status] = row._count.status;
+  // One bounded lookup for the top five; no per-asset count/name queries.
+  const assets = frequent.length ? await prisma.asset.findMany({ where: { ...scope, id: { in: frequent.map(row => row.assetId) } }, select: { id: true, name: true, assetCode: true } }) : [];
+  const names = new Map(assets.map(asset => [asset.id, asset]));
   return {
-    role:            ROLES.ADMIN,
-    totalComplaints: total,
-    byStatus:        toStatusMap(statusRows),
-    byCategory:      toCategoryMap(categoryRows),
-    overdueCount,
+    role: ROLES.ADMIN, totalComplaints, byStatus, byCategory, overdueCount,
+    assets: { active: assetStatus.ACTIVE, inactive: assetStatus.INACTIVE, qrComplaints, openComplaints: openAssetComplaints,
+      mostReported: frequent.filter(row => names.has(row.assetId)).map(row => ({ ...names.get(row.assetId), complaintCount: row._count.assetId })) },
   };
 }
 
@@ -115,8 +116,8 @@ async function getAdminStats() {
  * @returns {object}
  */
 async function getDashboardStats(user) {
-  if (user.role === ROLES.RESIDENT) return getResidentStats(user.id);
-  return getAdminStats();
+  if (user.role === ROLES.RESIDENT) return getResidentStats(user);
+  return getAdminStats(user);
 }
 
 module.exports = { getDashboardStats };
