@@ -59,3 +59,16 @@ temp/
 
 # Generated reports and test artifacts
 qa-artifacts/
+
+# Local browser QA output
+/playwright-report/
+/test-results/
+**/tests/screenshots/
+**/tests/recordings/
+**/playwright-report/
+**/test-results/
+
+# Local PostgreSQL restore inventories and compressed dumps
+/societycare-restore*.list
+*.sql.gz
+*.sql.bak
