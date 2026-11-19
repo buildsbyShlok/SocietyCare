@@ -1,180 +1,91 @@
-# SocietyCare
+<div align="center">
 
-Residential society maintenance management with resident and admin portals. This is an existing React/Express application; PostgreSQL is the system of record.
+# 🏡 SocietyCare
 
-## Architecture and features
+### Smart Society Management · QR-Based Fault Reporting
 
-- `client`: React 19, Vite 6, React Router 7, CSS, Framer Motion and Lucide React. Semantic light/dark themes with Geist headings, Inter body text and Geist Mono identifiers; fonts are served locally with their licenses.
-- `server`: Node.js, Express 4, Prisma 6 and PostgreSQL. Routes → middleware → controllers → services → Prisma.
-- Authentication: bcrypt passwords and Bearer JWTs. Every protected request reloads the user's current database identity/role. Demotion takes effect on the next request; deleted users receive 401. Disabled users cannot sign in or reuse an existing token.
-- Enrollment: public registration creates a disabled resident request. A same-society administrator verifies the request and approves it in the Resident Directory. Existing account access is preserved.
-- Residents: register/login, profile settings, submit and filter their own complaints, view details/history and read notices.
-- Admins: dashboard statistics and overdue monitoring, complaint status/priority updates, remarks/history, notice creation/editing/pinning/deletion, searchable directory and role management.
-- Complaint states: `OPEN → IN_PROGRESS → RESOLVED`, or `OPEN → RESOLVED`. `UNRESOLVED` is a list filter for open/in-progress complaints, not a stored status. Remarks are optional in the current implementation.
-- Optional integrations: Cloudinary image attachments/avatars; Groq complaint assistance and ownership-scoped semantic duplicate detection; Resend status-change and pinned-notice emails.
-- AI routes are only `POST /api/ai/analyze-complaint` and `POST /api/ai/detect-duplicates`, both authenticated and accepting `{ "complaint": "..." }`.
+A modern platform for simpler maintenance reporting, transparent complaint tracking, and connected residential communities.
 
-## Society workspace
+[![Live Website](https://img.shields.io/badge/Live_Website-Visit_SocietyCare-16A34A?style=for-the-badge&logo=vercel&logoColor=white)](https://society-care-swart.vercel.app/)
+[![GitHub](https://img.shields.io/badge/Source_Code-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/buildsbyShlok/SocietyCare)
 
-Home opens at `/`. Admin Management → Society information controls its name, address, flat capacity and description. Registered flats count distinct tower/unit pairs on active resident accounts. Physical occupancy is not inferred.
+</div>
 
-Events at /events are published by residents or admins, with creator/admin editing and soft removal. Event times are entered/displayed in the browser’s local timezone and stored in UTC. Home shows upcoming events. Announcements have categories and dedicated detail pages.
+---
 
-Community supports text, images (JPEG/PNG/WebP, 5 MB), replies, avatars and unit labels. Messages refresh every seven seconds. Message options include reporting. Admins review reported messages and can remove them from the feed. Profiles display complaint history to the owner and admins. Residents can remove their own complaints with confirmation and an audit reason; admins can archive permitted complaints through the dedicated complaint area. Archival preserves the record and history.
+## ✨ Overview
 
-## Windows local setup (PowerShell)
+**SocietyCare** connects residents and society administrators in one streamlined experience. Report issues, manage shared equipment, follow complaint progress, and stay updated with your community.
 
-Use Node.js **24.22.2 LTS** (the `.nvmrc` version), npm and a running local PostgreSQL service on port 5432. Existing databases must be preserved. Run each block from the indicated directory.
+Its signature feature is **QR-based fault reporting**: scan a code on society equipment to open the correct reporting page automatically.
 
-From the project root:
+## 🚀 Features
 
-```powershell
-Set-Location 'S:\PROJECTS\SOCIETY CARE\society-maintenance-management-main'
-Set-Location server
-npm ci
-Set-Location ../client
-npm ci
+- 📱 **QR Fault Reporting** — Scan equipment codes and report issues with asset details already identified.
+- 🛠️ **Asset Management** — Organize shared equipment, generate QR codes, and review complaint history.
+- 📝 **Complaint Tracking** — Submit complaints, attach photos, and follow resolution status.
+- 🔐 **Secure Enrollment** — Resident access through administrator approval and role-based permissions.
+- 📊 **Admin Dashboard** — Monitor complaints, assets, and key society activity.
+- 💬 **Community Chat** — Keep conversations in one shared community space.
+- 📢 **Notices & Announcements** — Share important updates with residents.
+- 🏘️ **Society-Based Access** — Keep each society's information appropriately separated.
+
+## 🔄 How QR Reporting Works
+
+```text
+🏷️ Admin creates an asset
+          ↓
+🔳 Unique QR code is generated
+          ↓
+📱 Resident scans the QR code
+          ↓
+📝 Resident signs in and reports the fault
+          ↓
+🛠️ Admin reviews and resolves the complaint
+          ↓
+✅ Status and asset history are updated
 ```
 
-If PowerShell blocks npm scripts, use `npm.cmd` and `npx.cmd` instead of changing system execution policy.
+## 🧰 Tech Stack
 
-For a fresh setup only, copy the root `.env.example` to `server/.env` if that file does not already exist. Edit its values locally. Never overwrite an existing `.env` or commit credentials.
+<div align="center">
 
-```powershell
-# Run from the project root; preserve existing configuration.
-if (!(Test-Path server/.env)) { Copy-Item .env.example server/.env }
-```
+**Frontend**
 
-Create `client/.env` if missing, with:
+![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css&logoColor=white)
 
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+**Backend & Database**
 
-In PostgreSQL/pgAdmin, create the `society_maintenance` database only if it does not already exist. Configure `server/.env` with your actual database user/password (URL-encode special characters):
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=white)
 
-```env
-NODE_ENV=development
-PORT=5000
-CLIENT_URL=http://localhost:5173
-DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/society_maintenance
-JWT_SECRET=YOUR_GENERATED_RANDOM_SECRET
-JWT_EXPIRES_IN=7d
-```
+**Services & Deployment**
 
-Generate a secret locally with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` and save it in `server/.env`.
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat-square&logo=cloudinary&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-F55036?style=flat-square&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-000000?style=flat-square&logo=render&logoColor=white)
+![Neon](https://img.shields.io/badge/Neon-00E599?style=flat-square&logo=neon&logoColor=black)
 
-From `server`, validate and apply the committed migrations:
+</div>
 
-```powershell
-npx prisma generate
-npx prisma validate
-npx prisma migrate status
-npx prisma migrate deploy
-```
+## 🌐 Live Website
 
-`migrate status` reports pending migrations before they are applied. `migrate deploy` applies existing migration files; do not use `db push`, reset, or seed scripts to initialize an existing installation. Do not edit applied migrations. Committed migrations include overdue fields, the society workspace, notice categories, events, and chat attachments/replies. If Windows locks the Prisma engine DLL, stop the local API, regenerate Prisma Client and restart the API.
+**[society-care-swart.vercel.app](https://society-care-swart.vercel.app/)**
 
-## Environment variables
+## 🎯 Purpose
 
-| Variable | Purpose / default |
-| --- | --- |
-| `DATABASE_URL` | Required PostgreSQL connection string |
-| `JWT_SECRET` | Required strong random signing secret; never expose to the client |
-| `CLIENT_URL` | Required exact frontend origin for CORS, locally `http://localhost:5173` |
-| `PORT` | Backend port, default `5000` |
-| `NODE_ENV` | `development` locally; `production` when hosted |
-| `JWT_EXPIRES_IN` | Token lifetime, default `7d` |
-| `CRON_OVERDUE_INTERVAL` | Overdue check schedule, default `*/30 * * * *` |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Optional; all three required for complaint images, avatars, event posters and chat attachments |
-| `GROQ_API_KEY` | Optional; required for AI analysis and duplicate checks |
-| `RESEND_API_KEY`, `FROM_EMAIL` | Optional; both required for email; sender must be verified in Resend |
-| `VITE_PUBLIC_FRONTEND_URL` | Public HTTPS frontend origin for production QR labels. Set before building. |
-| `VITE_API_URL` | Client only; API base URL including `/api` |
+Built as a **Startup & Innovation** project, SocietyCare explores a practical approach to more accessible fault reporting, clearer maintenance accountability, and better community communication.
 
-Leave unused integration values empty. Missing Cloudinary/Groq configuration returns an actionable 503 when requested; text-only complaints still work. Email is best effort: absent configuration skips delivery with a server warning, and failures are logged without rolling back complaint/notice changes. No production flow uses mock data.
+---
 
-Integration setup and troubleshooting:
-- Keep provider keys only in `server/.env`; never prefix them with `VITE_`. The backend resolves this file from its own directory even when started with `node server/server.js` from the project root. Existing process environment values take precedence.
-- Restart an already-running backend after adding credentials. New `npm run dev` sessions watch `server/.env` automatically; `npm start` still requires a restart. A healthy API with 503 “not configured” can indicate a stale process.
-- Open the frontend at the exact `CLIENT_URL` origin. `http://localhost:5173` and `http://127.0.0.1:5173` are different browser origins; a mismatch causes CORS/network failures.
-- Cloudinary accepts PNG/JPEG/WebP with matching file content, up to 5 MB (avatars: 2 MB). Uploads have a 30-second deadline. New uploads persist both HTTPS URLs and public IDs; existing URLs remain intact and their new ID columns are nullable.
-- Groq uses `openai/gpt-oss-20b` with `openai/gpt-oss-120b` fallback, verified against the account's model list. Each call has a 12-second timeout. Authentication/quota/timeout failures stop retries and return actionable errors; model/unavailable or malformed responses allow one fallback. AI routes allow 12 requests per account per minute.
-- HTTP 503 for provider access requires checking the server-side account/key permissions; 429 means wait for the usage window or provider quota; 504 means retry after a timeout. Provider response bodies are not returned or logged. Manual complaint submission remains available.
-- Opt-in live verification: `node tests/database/integrations-live-check.js` from `server`. This requires an active local QA resident (set QA_EMAIL), makes real provider calls, consumes provider quota, and **retains clearly labelled QA records**. It writes results outside the project to the OS temporary directory (or QA_OUTPUT_DIR), and is not part of `npm test`.
+<div align="center">
 
-Login permits 15 failed attempts per IP per 15 minutes; successful logins do not consume the allowance. Registration has a separate 15-attempt allowance. `/auth/me` and logout do not share those limits. The same protection runs locally and in production. The limiter store is per process; multiple production instances require a coordinated store and a reviewed proxy configuration.
+**Designed & crafted by Shlok with ❤️**
 
-## Start the application
-
-Backend, in one PowerShell terminal:
-
-```powershell
-Set-Location 'S:\PROJECTS\SOCIETY CARE\society-maintenance-management-main\server'
-npm run dev
-```
-
-Frontend, in another terminal:
-
-```powershell
-Set-Location 'S:\PROJECTS\SOCIETY CARE\society-maintenance-management-main\client'
-npm run dev
-```
-
-Open `http://localhost:5173`. API health is `http://localhost:5000/api/health`. Backend startup checks PostgreSQL connectivity and runs the overdue scheduler immediately, then every 30 minutes by default. Production backend command is `npm start` from `server`; `npm run build` from `client` writes `client/dist`.
-
-Public registration creates residents only. Existing administrators can promote accounts through the directory. Do not run `prisma/seed.js` on an existing database. Administrator provisioning requires explicit ADMIN_EMAIL and ADMIN_PASSWORD and refuses to promote existing residents. See docs/deployment.md. Demo seeding is disabled by default and refuses non-empty or non-local databases; it requires development mode, ALLOW_DEMO_SEED=true and an explicit DEMO_PASSWORD. Never run it on the working database.
-
-## Verification
-
-```powershell
-# From server
-npx prisma validate
-npx prisma migrate status
-npm test
-npm run test:database  # optional local PostgreSQL workflow checks with rollback
-
-# From client
-npm run build
-```
-
-The standard backend tests use mocked database/provider methods; they do not establish browser or external-provider success. The opt-in database check uses PostgreSQL inside a rolled-back transaction. Frontend checks cover component rendering, handlers, design-token contrast and assets. Run live provider/browser checks separately.
-
-If a session cannot be verified due to a temporary service error, retry instead of signing in repeatedly. A 401 clears the session. Role updates are enforced by the API immediately and refreshed in the UI on window focus, reload or an authorization failure.
-
-## Deployment
-
-See `docs/deployment.md`. Apply committed migrations as an explicit deployment step before backend startup; the Dockerfile itself starts `node server.js`. Static hosting must rewrite deep links to `index.html` (Vercel and Nginx configurations are included). Set the correct production CORS origin and API base URL. Deployment is not part of local QA.
-
-## License
-
-MIT. See `LICENSE`.
-
-## Platform UI verification
-
-From `client`, run `npm run test:ui`, `npm run test:platform` and `npm run build`. The first checks component rendering with isolated fixtures; the second checks semantic color contrast and local font files. Neither replaces browser interaction, responsive-layout or runtime performance testing. Authenticated pages are loaded lazily, with a recovery screen for rendering/chunk failures.
-
-Local font provenance and OFL license files are in `client/public/fonts`. Sources: [Geist](https://github.com/vercel/geist-font) and [Inter](https://github.com/rsms/inter), distributed through Google Fonts.
-
-## Permanent account deletion
-Administrators can permanently delete another account from Resident Directory after an identifying confirmation. Self-deletion and removal of the final active admin are blocked; authorization always uses the current database role.
-
-Migration `20261107140000_user_delete_preserve_records` makes historical account relationships nullable with `ON DELETE SET NULL`. Deletion removes the user row (login, password hash and profile). Complaints, status history, published notices/events/messages and reports remain with deleted-account fallbacks. Legacy invoice/payment tables are intentionally retained without UI or API access so existing database records are not deleted. This is not a purge of authored content or externally stored media. Existing JWTs cease to authenticate. Apply migrations with `npx prisma migrate deploy` from `server` and regenerate the Prisma client before starting the updated server.
-
-## QR asset fault reporting — Phases 1–3
-
-Admins can open **Asset Management** to register equipment, edit its details, activate/deactivate it, and download or print its QR label. An unused asset can be permanently removed after confirmation; an asset with linked complaints can only be deactivated so history stays intact. Apply the additive migration with `npx prisma migrate deploy` and run `npx prisma generate` from `server` before starting the updated backend. No seed/reset is required.
-
-QR labels now contain `<frontend-origin>/report/<qrToken>`. Previously printed `/report/asset/<qrToken>` links remain supported. The public page shows only active equipment identification. Sign-in/register links preserve the complete QR destination; authenticated residents submit through the existing complaint API with optional photo uploads. Admins cannot submit resident reports. Generate installation labels from the deployed website, not localhost. Existing manual complaints still work without an asset. API details are in [the API reference](docs/api-reference.md).
-
-Migration `20261114090000_qr_reporting` adds a MANUAL/QR complaint source and database-backed User/Asset society relationships. Existing records belong to this single-society installation (Society 1). Registration assigns that society server-side via the database default; body-supplied membership is not accepted as authority. QR reporting rejects mismatched membership, and rechecks role, enabled status and asset availability inside the insert transaction after upload.
-
-Phase 3 adds `20261114100000_complaint_society_scope`, which records every complaint's society independently of a nullable resident or asset link. Admin complaint lists, details, status changes, asset histories and dashboard asset metrics use that scope. The board supports QR/manual source and asset filters; linked assets display their name/code without exposing QR tokens. This preserves the existing single-society operating model while enforcing society boundaries for the QR asset reporting workflows.
-
-`npm test` and `npm run test:database` in `server` cover validation, duplicate codes, role enforcement, token stability, activation, edits and complaint compatibility. The database check rolls back its fixtures. The client uses [qrcode](https://github.com/soldair/node-qrcode) for local QR generation; QR data is not sent to an external generator.
-
-## Runtime maintenance
-
-Keep server secrets in ignored environment files; .dockerignore also excludes them from images. Node 24 LTS is the supported deployment runtime. Backend source runs directly without a compilation step; Prisma Client generation is its required preparation. The Prisma CLI/client stay on matching 6.19.3 versions; the scoped deepmerge-ts override fixes its transitive advisory and is covered by Prisma validation/generation and database checks. Resend 6 uses the existing email API.
-
-Useful documentation: [architecture](docs/architecture.md), [API](docs/api-reference.md), [database](docs/database-schema.md), [deployment](docs/deployment.md).
+</div>
