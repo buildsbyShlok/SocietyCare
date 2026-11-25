@@ -1,35 +1,38 @@
-/* SocietyCare semantic theme. Compatibility aliases keep existing components on one palette. */
+/* SocietyCare "Quiet Estate" theme (see /DESIGN.md).
+   :root holds the graphite dark theme; [data-theme="light"] (the default) overrides it.
+   Compatibility aliases keep existing components on one palette. */
 :root {
   color-scheme: dark;
   --font-family:
-    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Geist", "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   --font-heading: "Geist", "Inter", system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
   --font-size-2xs: 0.6875rem;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-lg: 1.0625rem;
   --font-size-xl: 1.25rem;
   --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --color-bg-canvas: #0b0d12;
-  --color-bg-base: #0b0d12;
-  --color-bg-surface: #151820;
-  --color-bg-elevated: #1e222d;
-  --color-bg-hover: #252a36;
-  --color-bg-active: #2b3140;
-  --color-gray-50: #0b0d12;
-  --color-gray-100: #151820;
-  --color-gray-200: #303541;
-  --color-gray-300: #525b6d;
-  --color-gray-400: #a4acba;
-  --color-gray-500: #a4acba;
-  --color-gray-600: #c4cad5;
-  --color-gray-700: #dce1ea;
-  --color-gray-800: #ebeef5;
-  --color-gray-900: #f6f7fb;
+  --font-size-3xl: 2rem;
+  --color-bg-canvas: #121412;
+  --color-bg-base: #121412;
+  --color-bg-surface: #191c1a;
+  --color-bg-elevated: #212522;
+  --color-bg-hover: #262a27;
+  --color-bg-active: #2e332f;
+  --color-gray-50: #121412;
+  --color-gray-100: #191c1a;
+  --color-gray-200: #2b2f2c;
+  --color-gray-300: #474d48;
+  --color-gray-400: #a6aca3;
+  --color-gray-500: #a6aca3;
+  --color-gray-600: #c5cac1;
+  --color-gray-700: #dadfd6;
+  --color-gray-800: #e9ece5;
+  --color-gray-900: #f3f4ef;
+  --color-accent-on-paper: #435cf5;
   --color-accent: #8b9aff;
   --color-accent-dark: #a3afff;
   --color-accent-darker: #b8c1ff;
@@ -37,23 +40,23 @@
   --color-accent-light: #232a48;
   --color-accent-border: #505f9d;
   --color-on-accent: #0b0d12;
-  --color-control-border: #707b90;
+  --color-control-border: #707870;
   --color-secondary: var(--color-accent-highlight);
   --color-primary: var(--color-accent);
   --color-primary-dark: var(--color-accent-dark);
   --color-primary-light: var(--color-accent-light);
-  --color-success: #83c9a7;
-  --color-success-light: #172d25;
-  --color-success-border: #396750;
-  --color-warning: #e8bd73;
-  --color-warning-light: #30271a;
-  --color-warning-border: #776039;
-  --color-danger: #f29aa4;
-  --color-danger-light: #351f27;
-  --color-danger-border: #81505b;
-  --color-status-open: #b0bcf7;
-  --color-status-open-bg: #232a48;
-  --color-status-open-border: #505f9d;
+  --color-success: #9dcb91;
+  --color-success-light: #1c281b;
+  --color-success-border: #3d5939;
+  --color-warning: #e3b96b;
+  --color-warning-light: #2b2416;
+  --color-warning-border: #685430;
+  --color-danger: #ef9c91;
+  --color-danger-light: #321f1c;
+  --color-danger-border: #77463f;
+  --color-status-open: #a9c0e2;
+  --color-status-open-bg: #1b2431;
+  --color-status-open-border: #3d506e;
   --color-status-in-progress: var(--color-warning);
   --color-status-in-progress-bg: var(--color-warning-light);
   --color-status-in-progress-border: var(--color-warning-border);
@@ -62,7 +65,7 @@
   --color-status-resolved-border: var(--color-success-border);
   --color-priority-low: var(--color-gray-500);
   --color-priority-low-bg: var(--color-bg-elevated);
-  --color-priority-low-border: var(--color-gray-200);
+  --color-priority-low-border: var(--color-gray-300);
   --color-priority-medium: var(--color-warning);
   --color-priority-medium-bg: var(--color-warning-light);
   --color-priority-medium-border: var(--color-warning-border);
@@ -74,6 +77,9 @@
   --color-border: var(--color-gray-200);
   --color-border-hover: var(--color-gray-300);
   --color-bg-subtle: var(--color-bg-elevated);
+  --color-focus-ring: color-mix(in srgb, var(--color-accent) 42%, transparent);
+  --color-scrim: rgba(6, 8, 7, 0.68);
+
   /* ── Spacing Scale ───────────────────────────────────────── */
   --space-0-5: 0.125rem; /* 2px */
   --space-1: 0.25rem; /* 4px */
@@ -90,70 +96,78 @@
   /* ── Border Radius ───────────────────────────────────────── */
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-xl: 12px;
   --radius-full: 9999px;
 
-  /* ── Modern SaaS Shadows & Glows ─────────────────────────── */
+  /* ── Elevation: near-flat; shadows only for floating layers ─ */
   --shadow-sm: none;
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 18px 36px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.36);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.42);
   --shadow-emerald: none;
   --shadow-glow: none;
 
+  /* ── Motion ──────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-state: 160ms;
+  --dur-enter: 240ms;
+
   /* ── Native Controls ─────────────────────────────────────── */
   accent-color: var(--color-accent);
-  --color-scrollbar-track: var(--color-bg-base);
+  --color-scrollbar-track: transparent;
   --color-scrollbar-thumb: var(--color-gray-300);
   scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
 
   /* ── Layout & Responsive Constants ───────────────────────── */
-  --container-max-width: 1280px;
-  --sidebar-width: 260px;
-  --sidebar-collapsed-w: 72px;
-  --navbar-height: 64px;
+  --container-max-width: 1180px;
+  --sidebar-width: 248px;
+  --sidebar-collapsed-w: 68px;
+  --navbar-height: 60px;
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-bg-canvas: #f8f9fb;
-  --color-bg-base: #f8f9fb;
-  --color-bg-surface: #ffffff;
-  --color-bg-elevated: #f1f3f7;
-  --color-bg-hover: #ebeef5;
-  --color-bg-active: #e3e7f2;
-  --color-gray-50: #f8f9fb;
-  --color-gray-100: #f1f3f7;
-  --color-gray-200: #e5e8ed;
-  --color-gray-300: #b5bdca;
-  --color-gray-400: #626976;
-  --color-gray-500: #626976;
-  --color-gray-600: #434a56;
-  --color-gray-700: #303641;
-  --color-gray-800: #222730;
-  --color-gray-900: #111318;
-  --color-accent: #435cf5;
+  --color-bg-canvas: #f6f4ef;
+  --color-bg-base: #f6f4ef;
+  --color-bg-surface: #fdfcf9;
+  --color-bg-elevated: #efece4;
+  --color-bg-hover: #ebe7de;
+  --color-bg-active: #e3ded3;
+  --color-gray-50: #f6f4ef;
+  --color-gray-100: #efece4;
+  --color-gray-200: #e3dfd5;
+  --color-gray-300: #c8c2b5;
+  --color-gray-400: #5b605c;
+  --color-gray-500: #5b605c;
+  --color-gray-600: #3e4340;
+  --color-gray-700: #2c302e;
+  --color-gray-800: #202422;
+  --color-gray-900: #17191c;
+  --color-accent: var(--color-accent-on-paper);
   --color-accent-dark: #354bce;
   --color-accent-darker: #2b3eac;
-  --color-accent-highlight: #354bce;
+  --color-accent-highlight: var(--color-accent-dark);
   --color-accent-light: #edf0ff;
   --color-accent-border: #c5cdfa;
   --color-on-accent: #ffffff;
-  --color-control-border: #7b8595;
-  --color-success: #24714d;
-  --color-success-light: #eaf5ef;
-  --color-success-border: #b8d9c6;
-  --color-warning: #805510;
-  --color-warning-light: #fbf2e2;
-  --color-warning-border: #e8d5b1;
-  --color-danger: #ad3043;
-  --color-danger-light: #fceef0;
-  --color-danger-border: #eac3cb;
-  --color-status-open: #4356b8;
-  --color-status-open-bg: #edf0ff;
-  --color-status-open-border: #c5cdfa;
-  --shadow-md: 0 4px 16px rgba(17, 19, 24, 0.06);
-  --shadow-lg: 0 12px 28px rgba(17, 19, 24, 0.1);
+  --color-control-border: #8a8579;
+  --color-success: #2c6a3c;
+  --color-success-light: #e6efe3;
+  --color-success-border: #b9d3b4;
+  --color-warning: #875710;
+  --color-warning-light: #f6ecd9;
+  --color-warning-border: #e2cc9f;
+  --color-danger: #a3372f;
+  --color-danger-light: #f8e7e3;
+  --color-danger-border: #e8c0b8;
+  --color-status-open: #2f5788;
+  --color-status-open-bg: #e6edf6;
+  --color-status-open-border: #bccce2;
+  --color-focus-ring: color-mix(in srgb, var(--color-accent) 28%, transparent);
+  --color-scrim: rgba(23, 25, 28, 0.42);
+  --shadow-md: 0 6px 18px rgba(40, 36, 26, 0.07);
+  --shadow-lg: 0 16px 40px rgba(40, 36, 26, 0.1);
+  --shadow-xl: 0 24px 60px rgba(40, 36, 26, 0.14);
 }

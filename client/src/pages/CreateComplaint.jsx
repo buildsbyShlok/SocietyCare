@@ -355,10 +355,10 @@ export default function CreateComplaint() {
             <CheckCircle2 size={36} />
           </div>
 
-          <h1 className="complaint-success-title">Issue Successfully Reported</h1>
+          <h1 className="complaint-success-title">Complaint sent</h1>
 
           <div className="complaint-ref-badge">
-            <span className="complaint-ref-label">Reference ID</span>
+            <span className="complaint-ref-label">Reference</span>
             <code className="complaint-ref-code">#{submitted.id.slice(-6)}</code>
           </div>
 
@@ -370,14 +370,14 @@ export default function CreateComplaint() {
           <div className="complaint-success-actions">
             <Link to={`/complaints/${submitted.id}`} className="btn btn-primary">
               <FileCheck size={15} />
-              <span>View Complaint Details</span>
+              <span>View complaint</span>
             </Link>
             <button onClick={resetForm} className="btn btn-secondary" type="button">
               <PlusCircle size={15} />
-              <span>Report Another Issue</span>
+              <span>Report another issue</span>
             </button>
             <Link to="/complaints" className="btn btn-secondary">
-              <span>Return to Backlog</span>
+              <span>My complaints</span>
             </Link>
           </div>
         </motion.div>
@@ -392,16 +392,16 @@ export default function CreateComplaint() {
       <div className="back-navigation-container">
         <Link to="/complaints" className="complaint-back-link">
           <ArrowLeft size={14} />
-          <span>Back to Backlog</span>
+          <span>My complaints</span>
         </Link>
       </div>
 
       {/* Header */}
       <header className="page-header">
         <div className="page-header-title">
-          <h1>Report Issue</h1>
+          <h1>Report an issue</h1>
           <p className="page-header-subtitle">
-            Submit a maintenance ticket for repairs, servicing, or common area attention
+            Tell the committee what needs fixing. You can follow every update from your complaints list.
           </p>
         </div>
       </header>
@@ -445,7 +445,7 @@ export default function CreateComplaint() {
           {/* Form Field: Title */}
           <div className="form-group">
             <label htmlFor="complaint-title" className="form-label">
-              Issue Title <span className="text-danger">*</span>
+              Title <span className="text-danger">*</span>
             </label>
             <input
               id="complaint-title"
@@ -476,7 +476,7 @@ export default function CreateComplaint() {
                 onChange={handleChange}
                 disabled={submitting}
               >
-                <option value="">— Select Category —</option>
+                <option value="">Choose a category</option>
                 {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
@@ -488,7 +488,7 @@ export default function CreateComplaint() {
 
             <div className="form-group">
               <label htmlFor="complaint-priority" className="form-label">
-                Priority Level <span className="text-danger">*</span>
+                Priority <span className="text-danger">*</span>
               </label>
               <select
                 id="complaint-priority"
@@ -512,7 +512,7 @@ export default function CreateComplaint() {
           <div className="form-group">
             <div className="form-label-row">
               <label htmlFor="complaint-description" className="form-label">
-                Detailed Description <span className="text-danger">*</span>
+                Description <span className="text-danger">*</span>
               </label>
               <button
                 type="button"
@@ -543,7 +543,7 @@ export default function CreateComplaint() {
               className={`form-textarea${fieldErrors.description ? ' is-error' : ''}`}
               value={form.description}
               onChange={handleChange}
-              placeholder="Describe the issue, location, when it started, and whether it poses safety risks..."
+              placeholder="What is wrong, where exactly, when it started, and whether it is a safety risk."
               rows={5}
               disabled={submitting}
             />
@@ -582,7 +582,7 @@ export default function CreateComplaint() {
           {/* Form Field: Enhanced Drag-and-Drop File Upload */}
           <div className="form-group file-upload-section">
             <label className="form-label">
-              Photo Evidence <span className="text-muted">(Optional · JPG, PNG, WebP · Max 5 MB)</span>
+              Photo <span className="text-muted">(Optional · JPG, PNG, WebP · Max 5 MB)</span>
             </label>
 
             <input
@@ -665,7 +665,7 @@ export default function CreateComplaint() {
           {submitting && uploadProgress > 0 && (
             <div className="submission-progress-wrapper">
               <div className="progress-label-row">
-                <span className="progress-label">Transmitting complaint package...</span>
+                <span className="progress-label">Sending your complaint…</span>
                 <span className="progress-percentage">{uploadProgress}%</span>
               </div>
               <progress className="upload-progress-bar" value={uploadProgress} max={100}>
@@ -698,17 +698,17 @@ export default function CreateComplaint() {
                 {submitting ? (
                   <>
                     <span className="spinner-border" />
-                    <span>Submitting...</span>
+                    <span>Sending…</span>
                   </>
                 ) : dupStatus === 'checking' ? (
                   <>
                     <Clock size={14} className="spin-icon" />
-                    <span>Checking Duplicates...</span>
+                    <span>Checking for similar complaints…</span>
                   </>
                 ) : (
                   <>
                     <PlusCircle size={15} />
-                    <span>Submit Complaint</span>
+                    <span>Send complaint</span>
                   </>
                 )}
               </button>

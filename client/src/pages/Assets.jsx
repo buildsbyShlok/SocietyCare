@@ -23,8 +23,8 @@ export default function Assets() {
   const source = useResource('/assets?page=' + page);
   return <div className="page ws-page asset-page">
     <header className="page-header">
-      <div><h1>Asset Management</h1><p>Keep your society’s equipment and its QR labels in one place.</p></div>
-      <Link to="/assets/new" className="btn btn-primary"><Plus size={18} />Add New Asset</Link>
+      <div className="page-header-title"><h1>Assets</h1><p className="page-header-subtitle">Shared equipment, its service status and the QR label residents scan to report a fault.</p></div>
+      <Link to="/assets/new" className="btn btn-primary"><Plus size={16} />Add asset</Link>
     </header>
     <Load source={source}>{data => <>
       <p className="ws-muted">{data.total} {data.total === 1 ? 'asset' : 'assets'} registered</p>
@@ -36,7 +36,7 @@ export default function Assets() {
           <p className="asset-location"><MapPin size={16} aria-hidden="true" />{asset.location}</p>
           <div className="asset-card-bottom"><span>{asset.category}</span><ArrowUpRight size={18} aria-hidden="true" /></div>
         </Link>
-      )}</div> : <div className="asset-empty"><Box size={36} aria-hidden="true" /><h2>No assets registered yet</h2><p>Add your first asset to create its equipment record and QR label.</p><Link className="btn btn-secondary" to="/assets/new">Add New Asset</Link></div>}
+      )}</div> : <div className="asset-empty"><Box size={36} aria-hidden="true" /><h2>No assets registered yet</h2><p>Add your first asset to create its equipment record and QR label.</p><Link className="btn btn-primary" to="/assets/new">Add asset</Link></div>}
       {(page > 1 || data.hasNext) && <nav className="event-pagination" aria-label="Asset pages">
         <button className="btn btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)}>Previous</button>
         <span>Page {page}</span>
@@ -50,7 +50,7 @@ export function AssetDetail() {
   const { id } = useParams();
   const source = useResource(assetPath(id));
   return <div className="page ws-page asset-page asset-detail-page">
-    <Link className="asset-back" to="/assets"><ArrowLeft size={16} />Back to assets</Link>
+    <Link className="back-link asset-back" to="/assets"><ArrowLeft size={15} />All assets</Link>
     <Load source={source}>{asset => <AssetRecord key={asset.id + asset.updatedAt} asset={asset} onChange={source.retry} />}</Load>
   </div>;
 }
@@ -149,8 +149,8 @@ export function AssetEditor() {
   const { id } = useParams();
   const source = useResource(id ? assetPath(id) : null);
   return <div className="page ws-page asset-page">
-    <Link className="asset-back" to={id ? assetPath(id) : '/assets'}><ArrowLeft size={16} />{id ? 'Back to asset' : 'Back to assets'}</Link>
-    <header className="page-header"><div><h1>{id ? 'Edit asset' : 'Add New Asset'}</h1><p>{id ? 'Update equipment details. The QR token stays the same.' : 'Register equipment and generate its unique QR label.'}</p></div></header>
+    <Link className="back-link asset-back" to={id ? assetPath(id) : '/assets'}><ArrowLeft size={16} />{id ? 'Back to asset' : 'All assets'}</Link>
+    <header className="page-header"><div><h1>{id ? 'Edit asset' : 'Add asset'}</h1><p>{id ? 'Update equipment details. The QR token stays the same.' : 'Register equipment and generate its unique QR label.'}</p></div></header>
     {id ? <Load source={source}>{asset => <AssetForm key={asset.id} asset={asset} />}</Load> : <AssetForm />}
   </div>;
 }

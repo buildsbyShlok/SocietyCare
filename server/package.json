@@ -1,7 +1,7 @@
 {
-  "name": "society-maintenance-server",
+  "name": "societycare-server",
   "version": "1.0.0",
-  "description": "Society Maintenance Tracker — Express REST API",
+  "description": "SocietyCare — Express REST API",
   "private": true,
   "main": "server.js",
   "scripts": {

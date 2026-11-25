@@ -27,9 +27,9 @@ import { Load, useResource } from '../components/Workspace';
 import './Complaints.css';
 
 const STATUS_TABS = [
-  { label: 'All Issues', value: '' },
+  { label: 'All', value: '' },
   { label: 'Open', value: 'OPEN' },
-  { label: 'In Progress', value: 'IN_PROGRESS' },
+  { label: 'In progress', value: 'IN_PROGRESS' },
   { label: 'Resolved', value: 'RESOLVED' },
 ];
 
@@ -125,18 +125,18 @@ export default function Complaints() {
       {/* Page Header */}
       <header className="page-header">
         <div className="page-header-title">
-          <h1>{archived ? 'Archived Complaints' : isAdmin ? 'Maintenance Backlog' : 'My Reported Issues'}</h1>
+          <h1>{archived ? 'Archived Complaints' : isAdmin ? 'Complaints' : 'My complaints'}</h1>
           <p className="page-header-subtitle">
             {isAdmin
-              ? 'Oversee, review, and progress society maintenance tickets'
-              : 'Track status and updates on your submitted maintenance requests'}
+              ? 'Review, prioritise and resolve requests from residents.'
+              : 'Follow the status and remarks on everything you have reported.'}
           </p>
         </div>
         <div className="workspace-actions">
           {!isAdmin && (
             <Link to="/complaints/new" className="btn btn-primary">
               <PlusCircle size={15} />
-              <span>Report Issue</span>
+              <span>Report an issue</span>
             </Link>
           )}
         </div>
@@ -148,8 +148,8 @@ export default function Complaints() {
             <section className="resident-complaint-summary" aria-labelledby="complaint-summary-heading">
               <div className="resident-complaint-summary-heading">
                 <div>
-                  <h2 id="complaint-summary-heading">Your complaint summary</h2>
-                  <p>Track every active request without leaving this board.</p>
+                  <h2 id="complaint-summary-heading" className="sr-only">Your complaint summary</h2>
+
                 </div>
               </div>
               <div className="metric-grid resident-metric-grid">
@@ -163,15 +163,7 @@ export default function Complaints() {
         </Load>
       )}
 
-      <div className="workspace-actions complaint-lifecycle-filter" role="group" aria-label="Complaint lifecycle">
-        {[false, true].map(value => (
-          <button key={String(value)} type="button" aria-pressed={archived === value}
-            className={'btn btn-sm ' + (archived === value ? 'btn-primary' : 'btn-secondary')}
-            onClick={() => setQuery('archived', value ? 'true' : '')}>
-            {value ? 'Archived complaints' : 'Active complaints'}
-          </button>
-        ))}
-      </div>
+      <div className="complaints-filter-row">
       {/* Horizontal Status Filter Tabs */}
       <div className="status-filter-tabs" role="tablist" aria-label="Filter issues by status">
         {STATUS_TABS.map((tab) => {
@@ -198,6 +190,17 @@ export default function Complaints() {
         })}
       </div>
 
+      <div className="workspace-actions complaint-lifecycle-filter" role="group" aria-label="Complaint lifecycle">
+        {[false, true].map(value => (
+          <button key={String(value)} type="button" aria-pressed={archived === value}
+            className={'btn btn-sm ' + (archived === value ? 'btn-primary' : 'btn-secondary')}
+            onClick={() => setQuery('archived', value ? 'true' : '')}>
+            {value ? 'Archived complaints' : 'Active complaints'}
+          </button>
+        ))}
+      </div>
+      </div>
+
       {/* Search & Secondary Filter Toolbar */}
       <div className="complaints-toolbar">
         <div className="toolbar-search-box">
@@ -205,7 +208,7 @@ export default function Complaints() {
           <input
             type="text"
             className="toolbar-search-input"
-            placeholder="Search keywords, title, or flat..."
+            placeholder="Search by title, keyword or flat"
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
             aria-label="Search complaints"
@@ -234,7 +237,7 @@ export default function Complaints() {
               onChange={(e) => setCategoryFilter(e.target.value)}
               aria-label="Filter by category"
             >
-              <option value="">All Categories</option>
+              <option value="">All categories</option>
               {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -250,7 +253,7 @@ export default function Complaints() {
               onChange={(e) => setPriorityFilter(e.target.value)}
               aria-label="Filter by priority"
             >
-              <option value="">All Priorities</option>
+              <option value="">All priorities</option>
               <option value="LOW">Low</option>
               <option value="MEDIUM">Medium</option>
               <option value="HIGH">High</option>
@@ -288,8 +291,8 @@ export default function Complaints() {
       <div className="complaints-meta-bar">
         <span className="complaints-count-text">
           Showing <strong className="text-primary">{complaints.length}</strong> of{' '}
-          <strong className="text-primary">{totalItems}</strong> Issue
-          {totalItems !== 1 ? 's' : ''}
+          <strong className="text-primary">{totalItems}</strong>{' '}
+          {totalItems !== 1 ? 'complaints' : 'complaint'}
         </span>
       </div>
 
@@ -323,14 +326,14 @@ export default function Complaints() {
           <div className="empty-state-icon-box">
             <Inbox size={32} />
           </div>
-          <h3>{hasActiveFilters ? 'No Matching Issues' : archived ? 'No Archived Complaints' : 'No Active Complaints'}</h3>
+          <h3>{hasActiveFilters ? 'No matching complaints' : archived ? 'No archived complaints' : 'No active complaints'}</h3>
           <p className="empty-state-desc">
             {hasActiveFilters
               ? 'Try widening or clearing your filters to see more results.'
               : archived
               ? 'Complaints you archive will appear here.'
               : isAdmin
-              ? 'All clear. There are currently no maintenance issues in the queue.'
+              ? 'All clear. There is nothing waiting in the queue.'
               : 'You have no active maintenance requests.'}
           </p>
           {hasActiveFilters ? (
@@ -340,12 +343,12 @@ export default function Complaints() {
               className="btn btn-secondary btn-sm"
             >
               <RotateCcw size={13} />
-              <span>Clear Filter Selections</span>
+              <span>Clear filters</span>
             </button>
           ) : !isAdmin && !archived ? (
             <Link to="/complaints/new" className="btn btn-primary btn-sm">
               <PlusCircle size={14} />
-              <span>Report an Issue</span>
+              <span>Report an issue</span>
             </Link>
           ) : null}
         </div>

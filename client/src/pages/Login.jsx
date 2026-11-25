@@ -1,9 +1,7 @@
-import { Brand } from '../components/Workspace';
+import AuthShell from '../components/AuthShell';
 import { useState } from 'react';
 import { Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { safeReportReturn, reportAuthPath } from '../utils/report-return';
-import { motion } from 'framer-motion';
-import { Building2, ArrowRight } from 'lucide-react';
 import { auth as authApi } from '../api/index';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
@@ -58,7 +56,7 @@ export default function Login() {
     return (
       <div className="loading-screen">
         <div className="spinner" aria-hidden="true" style={{ marginBottom: 'var(--space-2)' }}></div>
-        <span>Loading...</span>
+        <span>Loading…</span>
       </div>
     );
   }
@@ -92,20 +90,14 @@ export default function Login() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="auth-page">
-      <motion.div
-        className="auth-card"
-        initial={{ opacity: 0, scale: 0.96, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-      >
-        <header className="auth-header">
-          <Link to="/" aria-label="SocietyCare Home"><Brand/></Link>
-          <h1 className="auth-title">
-            Society<span style={{ color: 'var(--color-accent-highlight)' }}>Care</span>
-          </h1>
-          <p className="auth-subtitle">Sign in to your residential workspace</p>
-        </header>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Sign in to your society workspace."
+      footer={<>
+        Don&apos;t have an account?{' '}
+          <Link to={reportAuthPath('/register', returnTo)}>Request access</Link>
+      </>}
+    >
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
 
@@ -156,7 +148,6 @@ export default function Login() {
                 className="password-toggle"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                tabIndex={-1}
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -173,18 +164,10 @@ export default function Login() {
             className="btn btn-primary auth-submit"
             disabled={submitting}
           >
-            {submitting ? 'Signing in…' : 'Sign In'}
+            {submitting ? 'Signing in…' : 'Sign in'}
           </button>
 
         </form>
-
-        <hr className="auth-divider" />
-        <p className="auth-footer">
-          Don&apos;t have an account?{' '}
-          <Link to={reportAuthPath('/register', returnTo)}>Create one</Link>
-        </p>
-
-      </motion.div>
-    </div>
+    </AuthShell>
   );
 }

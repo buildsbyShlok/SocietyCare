@@ -214,17 +214,17 @@ export default function Notices() {
       {/* Page Header */}
       <header className="page-header">
         <div className="page-header-title">
-          <h1>Society notice board</h1>
+          <h1>Announcements</h1>
           <p className="page-header-subtitle">
-            Official society announcements, maintenance notifications, and
-            updates
+            Official updates from the managing committee, newest first. Pinned
+            notices stay at the top.
           </p>
         </div>
         <div className="workspace-actions">
           {isAdmin && (
             <Link to="/notices/new" className="btn btn-primary">
               <PlusCircle size={15} />
-              <span>Publish Notice</span>
+              <span>New announcement</span>
             </Link>
           )}
         </div>
@@ -306,20 +306,19 @@ export default function Notices() {
           <div className="empty-state-icon-box">
             <Megaphone size={30} />
           </div>
-          <h3>No Announcements Posted</h3>
+          <h3>No announcements yet</h3>
           <p className="empty-state-desc">
             {isAdmin
-              ? "Broadcast your first community notice using the button above."
-              : "There are currently no active community bulletins."}
+              ? "Publish the first update for residents. It will also appear on everyone’s Home page."
+              : "When the committee publishes an update, it will appear here."}
           </p>
           {isAdmin && (
             <Link
               to="/notices/new"
               className="btn btn-primary btn-sm"
-              style={{ marginTop: "var(--space-2)" }}
             >
               <PlusCircle size={14} />
-              <span>Publish First Notice</span>
+              <span>Write the first announcement</span>
             </Link>
           )}
         </div>
@@ -335,7 +334,7 @@ export default function Notices() {
               {editingId === notice.id ? (
                 <div className="notice-inline-form">
                   <div className="inline-form-header">
-                    <span className="inline-form-title">Edit Announcement</span>
+                    <span className="inline-form-title">Edit announcement</span>
                     <button
                       type="button"
                       className="inline-close-btn"
@@ -350,7 +349,6 @@ export default function Notices() {
                     <div
                       className="alert alert-error"
                       role="alert"
-                      style={{ fontSize: "11px", padding: "8px" }}
                     >
                       <AlertCircle size={14} />
                       <span>{editError}</span>
@@ -433,12 +431,12 @@ export default function Notices() {
                       {editSaving ? (
                         <>
                           <span className="spinner-border" />
-                          <span>Saving...</span>
+                          <span>Saving…</span>
                         </>
                       ) : (
                         <>
                           <Check size={14} />
-                          <span>Save Changes</span>
+                          <span>Save changes</span>
                         </>
                       )}
                     </button>

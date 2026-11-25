@@ -1,9 +1,7 @@
-import { Brand } from '../components/Workspace';
+import AuthShell from '../components/AuthShell';
 import { useState } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { safeReportReturn, reportAuthPath } from '../utils/report-return';
-import { motion } from 'framer-motion';
-import { Building2 } from 'lucide-react';
 import { auth as authApi } from '../api/index';
 import { useAuth } from '../context/AuthContext';
 import { ROLES } from '../utils/constants';
@@ -82,7 +80,7 @@ export default function Register() {
     return (
       <div className="loading-screen">
         <div className="spinner" aria-hidden="true" style={{ marginBottom: 'var(--space-2)' }}></div>
-        <span>Loading...</span>
+        <span>Loading…</span>
       </div>
     );
   }
@@ -130,20 +128,14 @@ export default function Register() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="auth-page">
-      <motion.div
-        className="auth-card"
-        initial={{ opacity: 0, scale: 0.96, y: 12 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-      >
-        <header className="auth-header">
-          <Link to="/" aria-label="SocietyCare Home"><Brand/></Link>
-          <h1 className="auth-title">
-            Society<span style={{ color: 'var(--color-accent-highlight)' }}>Care</span>
-          </h1>
-          <p className="auth-subtitle">Request access from your society administrator</p>
-        </header>
+    <AuthShell
+      title="Request resident access"
+      subtitle="Your society administrator verifies each request before you can sign in."
+      footer={<>
+        Already have an account?{' '}
+          <Link to={reportAuthPath('/login', returnTo)}>Sign in</Link>
+      </>}
+    >
 
         {receipt ? <p role="status" className="alert alert-success">{receipt}</p> : <form className="auth-form" onSubmit={handleSubmit} noValidate>
 
@@ -153,10 +145,10 @@ export default function Register() {
             </div>
           )}
 
-          {/* Full Name ----------------------------------------------------- */}
+          {/* Full name ----------------------------------------------------- */}
           <div className="form-group">
             <label htmlFor="reg-name" className="form-label">
-              Full Name
+              Full name
             </label>
             <input
               id="reg-name"
@@ -177,7 +169,7 @@ export default function Register() {
           {/* Email --------------------------------------------------------- */}
           <div className="form-group">
             <label htmlFor="reg-email" className="form-label">
-              Email Address
+              Email address
             </label>
             <input
               id="reg-email"
@@ -208,7 +200,7 @@ export default function Register() {
                 className={`form-input${fieldErrors.password ? ' is-error' : ''}`}
                 value={form.password}
                 onChange={handleChange}
-                placeholder="Minimum 8 characters"
+                placeholder="At least 8 characters"
                 autoComplete="new-password"
                 disabled={submitting}
               />
@@ -217,7 +209,6 @@ export default function Register() {
                 className="password-toggle"
                 onClick={() => setShowPassword((prev) => !prev)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                tabIndex={-1}
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -229,10 +220,11 @@ export default function Register() {
 
 
 
+          <div className="auth-row">
           {/* Flat Number --------------------------------------------------- */}
           <div className="form-group">
             <label htmlFor="reg-flat" className="form-label">
-              Flat / Unit Number
+              Flat or unit number
             </label>
             <input
               id="reg-flat"
@@ -252,8 +244,8 @@ export default function Register() {
           {/* Phone (optional) ---------------------------------------------- */}
           <div className="form-group">
             <label htmlFor="reg-phone" className="form-label">
-              Phone Number{' '}
-              <span className="text-muted text-xs">(optional)</span>
+              Phone number{' '}
+              <span className="form-optional">Optional</span>
             </label>
             <input
               id="reg-phone"
@@ -268,6 +260,8 @@ export default function Register() {
             />
           </div>
 
+          </div>
+
           {/* Submit --------------------------------------------------------- */}
           <button
             type="submit"
@@ -279,14 +273,6 @@ export default function Register() {
           </button>
 
         </form>}
-
-        <hr className="auth-divider" />
-        <p className="auth-footer">
-          Already have an account?{' '}
-          <Link to={reportAuthPath('/login', returnTo)}>Sign in</Link>
-        </p>
-
-      </motion.div>
-    </div>
+    </AuthShell>
   );
 }

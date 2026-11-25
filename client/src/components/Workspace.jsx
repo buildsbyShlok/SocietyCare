@@ -72,17 +72,15 @@ export function Row({ to, title, detail, meta }) {
     <div className="ws-row">{content}</div>
   );
 }
-export function Brand() {
+export function Brand({ size = 32 }) {
   return (
-    <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden="true">
-      <rect width="40" height="40" rx="10" fill="var(--color-accent-light)" />
-      <path
-        d="m7 27 8-4V13l9-5 9 5v15l-9 5-8-5-9 4z"
-        fill="none"
-        stroke="var(--color-accent)"
-        strokeWidth="2"
-      />
-      <path d="m16 13 8 5 9-5m-9 5v15m-14-5 7-4" fill="none" stroke="var(--color-accent)" strokeWidth="2" />
+    <svg className="brand-mark" viewBox="0 0 40 40" width={size} height={size} aria-hidden="true">
+      <rect width="40" height="40" rx="10" fill="var(--color-accent)" />
+      <g fill="var(--color-on-accent)">
+        <rect x="9.5" y="17" width="6" height="14" rx="1.2" />
+        <rect x="17" y="9" width="6" height="22" rx="1.2" />
+        <rect x="24.5" y="13" width="6" height="18" rx="1.2" />
+      </g>
     </svg>
   );
 }

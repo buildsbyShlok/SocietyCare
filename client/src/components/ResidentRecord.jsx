@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { Load, Section, Row, useResource } from "./Workspace";
+import { STATUS_LABELS } from "../utils/constants";
 import { formatDate } from "../utils/helpers";
 export function ResidentRecord({ id, details = false }) {
   const source = useResource("/users/" + encodeURIComponent(id) + "/record");
@@ -51,7 +52,13 @@ export function ResidentRecord({ id, details = false }) {
                   title={c.title}
                   detail={formatDate(c.createdAt)}
                   meta={
-                    c.archivedAt ? "Archived" : c.status.replaceAll("_", " ")
+                    c.archivedAt ? (
+                      "Archived"
+                    ) : (
+                      <span className={"status-dot status-" + c.status}>
+                        {STATUS_LABELS[c.status] || c.status}
+                      </span>
+                    )
                   }
                 />
               ))
@@ -68,7 +75,7 @@ export function ResidentDetails() {
   const { id } = useParams();
   return (
     <div className="page ws-page">
-      <Link to="/settings/users">Back to resident directory</Link>
+      <Link className="back-link" to="/settings/users">Resident directory</Link>
       <h1>Member record</h1>
       <ResidentRecord id={id} details />
     </div>

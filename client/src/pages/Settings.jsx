@@ -108,28 +108,28 @@ export default function Settings() {
     <div className="page settings-page animate-fade-in">
       <header className="page-header">
         <div className="page-header-title">
-          <h1>My Profile</h1>
+          <h1>My profile</h1>
           <p className="page-header-subtitle">
-            Manage your personal profile. Shared society information is managed by an administrator.
+            Your name, contact details and photo. Society-wide details are managed by an administrator.
           </p>
         </div>
       </header>
 
       {/* Settings Navigation Tabs */}
       <div className="settings-tabs">
-        <Link to="/settings" className="settings-tab active">
-          My Profile
+        <Link to="/settings" className="settings-tab active" aria-current="page">
+          My profile
         </Link>
         {isAdmin && (
           <Link to="/settings/users" className="settings-tab">
-            User Management
+            Resident directory
           </Link>
         )}
       </div>
 
       <div className="card settings-card">
         <form onSubmit={handleSubmit} noValidate className="settings-form">
-          <h2 className="settings-section-title">Profile Details</h2>
+          <h2 className="settings-section-title">Profile details</h2>
 
           {apiSuccess && (
             <div
@@ -209,7 +209,7 @@ export default function Settings() {
                 onClick={triggerFileInput}
                 disabled={submitting}
               >
-                Change Picture
+                Change photo
               </button>
               <p
                 id="settings-avatar-help"
@@ -226,10 +226,10 @@ export default function Settings() {
           </div>
 
           <div className="settings-fields-grid">
-            {/* Full Name */}
+            {/* Full name */}
             <div className="form-group">
               <label htmlFor="settings-name" className="form-label">
-                Full Name
+                Full name
               </label>
               <input
                 id="settings-name"
@@ -253,7 +253,7 @@ export default function Settings() {
             {/* Email (Read-only) */}
             <div className="form-group">
               <label htmlFor="settings-email" className="form-label">
-                Email Address (Read-only)
+                Email address
               </label>
               <input
                 id="settings-email"
@@ -263,12 +263,13 @@ export default function Settings() {
                 readOnly
                 disabled
               />
+              <p className="form-hint">Your sign-in email can’t be changed here.</p>
             </div>
 
             {/* Phone */}
             <div className="form-group">
               <label htmlFor="settings-phone" className="form-label">
-                Phone Number
+                Phone number
               </label>
               <input
                 id="settings-phone"
@@ -284,7 +285,7 @@ export default function Settings() {
             {/* Flat Number */}
             <div className="form-group">
               <label htmlFor="settings-flat" className="form-label">
-                Flat / Unit Number
+                Flat or unit number
               </label>
               <input
                 id="settings-flat"
@@ -317,12 +318,12 @@ export default function Settings() {
             {/* Role (Read-only) */}
             <div className="form-group">
               <label className="form-label">Role</label>
-              <div className="read-only-badge">{user.role}</div>
+              <div className="read-only-badge">{user.role === "ADMIN" ? "Administrator" : "Resident"}</div>
             </div>
 
-            {/* Member Since (Read-only) */}
+            {/* Member since (Read-only) */}
             <div className="form-group">
-              <label className="form-label">Member Since</label>
+              <label className="form-label">Member since</label>
               <div className="read-only-value">
                 {new Date(user.createdAt).toLocaleDateString("en-IN", {
                   day: "2-digit",

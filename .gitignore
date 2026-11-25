@@ -72,3 +72,7 @@ qa-artifacts/
 /societycare-restore*.list
 *.sql.gz
 *.sql.bak
+
+# Local assistant launch settings and Vite cache
+/.claude/launch.json
+.vite/

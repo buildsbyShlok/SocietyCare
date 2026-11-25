@@ -314,7 +314,7 @@ export default function ComplaintDetail() {
             style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
             <ArrowLeft size={14} />
-            <span>Back to Complaints Board</span>
+            <span>All complaints</span>
           </Link>
         </div>
       </div>
@@ -332,7 +332,7 @@ export default function ComplaintDetail() {
       <div className="back-navigation-container">
         <Link to="/complaints" className="complaint-back-link">
           <ArrowLeft size={14} />
-          <span>Back to Issues Board</span>
+          <span>All complaints</span>
         </Link>
       </div>
 
@@ -354,7 +354,7 @@ export default function ComplaintDetail() {
           <h1 className="detail-ticket-title">{complaint.title}</h1>
           <div className="detail-meta-subtitle">
             <Calendar size={13} />
-            <span>Logged on {formatDateTime(complaint.createdAt)}</span>
+            <span>Reported {formatDateTime(complaint.createdAt)}</span>
           </div>
         </div>
       </header>
@@ -382,7 +382,7 @@ export default function ComplaintDetail() {
           <section className="card workspace-panel">
             <h2 className="panel-title">
               <FileText size={16} className="panel-title-icon" />
-              <span>Issue Description</span>
+              <span>Description</span>
             </h2>
             <div className="complaint-detail-description">
               <p className="complaint-detail-text">{complaint.description}</p>
@@ -395,7 +395,7 @@ export default function ComplaintDetail() {
               <div className="panel-header-row">
                 <h2 className="panel-title">
                   <FileImage size={16} className="panel-title-icon" />
-                  <span>Attached Evidence</span>
+                  <span>Photo</span>
                 </h2>
                 <button
                   type="button"
@@ -404,7 +404,7 @@ export default function ComplaintDetail() {
                   aria-label="View full size photo"
                 >
                   <Maximize2 size={13} />
-                  <span>Expand Photo</span>
+                  <span>View full size</span>
                 </button>
               </div>
 
@@ -429,7 +429,7 @@ export default function ComplaintDetail() {
                 />
                 <div className="photo-overlay-hint">
                   <Maximize2 size={18} />
-                  <span>Click to Enlarge</span>
+                  <span>Click to enlarge</span>
                 </div>
               </div>
             </section>
@@ -439,7 +439,7 @@ export default function ComplaintDetail() {
           <section className="card workspace-panel">
             <h2 className="panel-title">
               <Clock size={16} className="panel-title-icon" />
-              <span>Activity & Audit Trail</span>
+              <span>History</span>
             </h2>
 
             {complaint.archivedAt && (
@@ -517,12 +517,10 @@ export default function ComplaintDetail() {
               </div>
             ) : (
               <p className="no-history-text">
-                No status transitions logged yet. The ticket is currently in its
-                initial{" "}
+                No status changes yet. This complaint is still{" "}
                 <strong className="text-accent">
                   {STATUS_LABELS[complaint.status] || complaint.status}
-                </strong>{" "}
-                state.
+                </strong>.
               </p>
             )}
           </section>
@@ -530,73 +528,6 @@ export default function ComplaintDetail() {
 
         {/* Right Side (30%) - Properties & State Transitions Form */}
         <aside className="complaint-detail-sidebar">
-          {isAdmin && <section className="card workspace-panel linked-equipment" aria-label="Complaint origin and equipment">
-            <h2 className="panel-title">Complaint origin</h2>
-            <ComplaintSource source={complaint.source} />
-            {complaint.asset ? <dl>
-              <div><dt>Asset</dt><dd><Link to={'/assets/' + complaint.asset.id}>{complaint.asset.name}</Link></dd></div>
-              <div><dt>Asset code</dt><dd>{complaint.asset.assetCode}</dd></div>
-              <div><dt>Equipment category</dt><dd>{complaint.asset.category}</dd></div>
-              <div><dt>Location</dt><dd>{complaint.asset.location}</dd></div>
-            </dl> : <p className="ws-muted">Not linked to an asset</p>}
-          </section>}
-          {/* Issue Properties Panel */}
-          <div className="card workspace-panel">
-            <h2 className="panel-title">
-              <Layers size={16} className="panel-title-icon" />
-              <span>Ticket Properties</span>
-            </h2>
-
-            <div className="metadata-list">
-              <div className="metadata-item">
-                <span className="metadata-label">Category</span>
-                <span className="metadata-value">
-                  {CATEGORY_LABELS[complaint.category] || complaint.category}
-                </span>
-              </div>
-
-              {complaint.resident && (
-                <div className="metadata-item">
-                  <span className="metadata-label">Resident / Reporter</span>
-                  <span className="metadata-value reporter-val">
-                    <User size={13} />
-                    <span>
-                      {complaint.resident.name} · Flat{" "}
-                      {complaint.resident.flatNumber}
-                    </span>
-                  </span>
-                </div>
-              )}
-
-              <div className="metadata-item">
-                <span className="metadata-label">Initial Submission</span>
-                <span className="metadata-value">
-                  {formatDateTime(complaint.createdAt)}
-                </span>
-              </div>
-
-              <div className="metadata-item">
-                <span className="metadata-label">Last Updated</span>
-                <span className="metadata-value">
-                  {formatDateTime(complaint.updatedAt)}
-                </span>
-              </div>
-
-              <div className="metadata-item">
-                <span className="metadata-label">Reference ID</span>
-                <span className="metadata-value font-mono text-accent">
-                  {complaint.id}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <ArchiveComplaint
-            id={id}
-            archived={Boolean(complaint.archivedAt)}
-            onArchived={() => setRefetchTrigger((n) => n + 1)}
-            onDeleted={() => navigate("/complaints?archived=true")}
-          />
           {/* Admin State Transition Form */}
           {canUpdateStatus && (
             <div className="card workspace-panel transition-panel">
@@ -605,7 +536,7 @@ export default function ComplaintDetail() {
                   size={16}
                   className="panel-title-icon text-accent"
                 />
-                <span>Admin State Transition</span>
+                <span>Update this complaint</span>
               </h2>
 
               <form
@@ -617,7 +548,6 @@ export default function ComplaintDetail() {
                   <div
                     className="alert alert-error"
                     role="alert"
-                    style={{ fontSize: "11px", padding: "8px" }}
                   >
                     <AlertCircle size={14} />
                     <span>{updateError}</span>
@@ -626,7 +556,7 @@ export default function ComplaintDetail() {
 
                 <div className="form-group">
                   <label htmlFor="new-status" className="form-label">
-                    Next Status
+                    Status
                   </label>
                   <select
                     id="new-status"
@@ -635,7 +565,7 @@ export default function ComplaintDetail() {
                     onChange={(e) => setNewStatus(e.target.value)}
                     disabled={updating}
                   >
-                    <option value="">— Select Transition —</option>
+                    <option value="">Keep current status</option>
                     {allowedTransitions.map((s) => (
                       <option key={s} value={s}>
                         {STATUS_LABELS[s]}
@@ -646,8 +576,8 @@ export default function ComplaintDetail() {
 
                 <div className="form-group">
                   <label htmlFor="new-priority" className="form-label">
-                    Override Priority{" "}
-                    <span className="text-muted">(Optional)</span>
+                    Priority{" "}
+                    <span className="form-optional">Optional</span>
                   </label>
                   <select
                     id="new-priority"
@@ -656,7 +586,7 @@ export default function ComplaintDetail() {
                     onChange={(e) => setNewPriority(e.target.value)}
                     disabled={updating}
                   >
-                    <option value="">— Retain Current Priority —</option>
+                    <option value="">Keep current priority</option>
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
                     <option value="HIGH">High</option>
@@ -665,15 +595,15 @@ export default function ComplaintDetail() {
 
                 <div className="form-group">
                   <label htmlFor="remark" className="form-label">
-                    Status Remark / Note{" "}
-                    <span className="text-muted">(Optional)</span>
+                    Remark for the resident{" "}
+                    <span className="form-optional">Optional</span>
                   </label>
                   <textarea
                     id="remark"
                     className="form-textarea"
                     value={remark}
                     onChange={(e) => setRemark(e.target.value)}
-                    placeholder="Provide context or instructions for this status change..."
+                    placeholder="What was done, or what happens next"
                     rows={3}
                     disabled={updating}
                   />
@@ -688,18 +618,85 @@ export default function ComplaintDetail() {
                   {updating ? (
                     <>
                       <span className="spinner-border" />
-                      <span>Updating...</span>
+                      <span>Saving…</span>
                     </>
                   ) : (
                     <>
                       <Send size={14} />
-                      <span>Apply Transition</span>
+                      <span>Save update</span>
                     </>
                   )}
                 </button>
               </form>
             </div>
           )}
+          {isAdmin && <section className="card workspace-panel linked-equipment" aria-label="Complaint origin and equipment">
+            <h2 className="panel-title">Complaint origin</h2>
+            <ComplaintSource source={complaint.source} />
+            {complaint.asset ? <dl>
+              <div><dt>Asset</dt><dd><Link to={'/assets/' + complaint.asset.id}>{complaint.asset.name}</Link></dd></div>
+              <div><dt>Asset code</dt><dd>{complaint.asset.assetCode}</dd></div>
+              <div><dt>Equipment category</dt><dd>{complaint.asset.category}</dd></div>
+              <div><dt>Location</dt><dd>{complaint.asset.location}</dd></div>
+            </dl> : <p className="ws-muted">Not linked to an asset</p>}
+          </section>}
+          {/* Issue Properties Panel */}
+          <div className="card workspace-panel">
+            <h2 className="panel-title">
+              <Layers size={16} className="panel-title-icon" />
+              <span>Details</span>
+            </h2>
+
+            <div className="metadata-list">
+              <div className="metadata-item">
+                <span className="metadata-label">Category</span>
+                <span className="metadata-value">
+                  {CATEGORY_LABELS[complaint.category] || complaint.category}
+                </span>
+              </div>
+
+              {complaint.resident && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Reported by</span>
+                  <span className="metadata-value reporter-val">
+                    <User size={13} />
+                    <span>
+                      {complaint.resident.name} · Flat{" "}
+                      {complaint.resident.flatNumber}
+                    </span>
+                  </span>
+                </div>
+              )}
+
+              <div className="metadata-item">
+                <span className="metadata-label">Reported on</span>
+                <span className="metadata-value">
+                  {formatDateTime(complaint.createdAt)}
+                </span>
+              </div>
+
+              <div className="metadata-item">
+                <span className="metadata-label">Last updated</span>
+                <span className="metadata-value">
+                  {formatDateTime(complaint.updatedAt)}
+                </span>
+              </div>
+
+              <div className="metadata-item">
+                <span className="metadata-label">Reference</span>
+                <span className="metadata-value font-mono text-accent">
+                  {complaint.id}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <ArchiveComplaint
+            id={id}
+            archived={Boolean(complaint.archivedAt)}
+            onArchived={() => setRefetchTrigger((n) => n + 1)}
+            onDeleted={() => navigate("/complaints?archived=true")}
+          />
         </aside>
       </div>
 

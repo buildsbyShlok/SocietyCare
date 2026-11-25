@@ -1,201 +1,240 @@
-/* Notice cards retain independent management controls and full-card detail links. */
+/* Announcements board — a ruled list, newest first, pinned notices marked. */
+
 .notices-board {
-  gap: 24px;
-}
-.notices-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
   gap: 20px;
 }
-.notice-card {
+
+.notices-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  overflow: hidden;
+}
+
+.notices-list .notice-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  padding: 26px;
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-md);
-  box-shadow: none;
+  gap: 10px;
+  padding: 22px 24px;
+  border: 0;
+  border-bottom: 1px solid var(--color-gray-200);
+  border-radius: 0;
+  background: transparent;
 }
-.notice-card:hover {
-  background: var(--color-bg-surface);
-  box-shadow: none;
-  border-color: var(--color-accent-border);
+
+.notices-list .notice-card:last-child {
+  border-bottom: 0;
 }
-.notice-card--pinned {
-  border-top: 3px solid var(--color-accent);
+
+.notices-list .notice-card:hover {
+  border-color: var(--color-gray-200);
+  background: color-mix(in srgb, var(--color-bg-elevated) 45%, transparent);
 }
+
+.notice-card--pinned::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 22px;
+  bottom: 22px;
+  width: 2px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-accent);
+}
+
 .notice-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  gap: 20px;
 }
+
 .notice-title-group {
   display: flex;
-  align-items: center;
-  gap: 9px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
   min-width: 0;
-  flex: 1 1 220px;
 }
-.notice-card-title {
-  flex-basis: 100%;
-  font-size: 20px;
-  font-weight: 600;
-  line-height: 1.45;
-  letter-spacing: -0.02em;
-  overflow-wrap: anywhere;
-  margin: 3px 0 0;
-}
-.notice-card-title a {
-  color: var(--color-gray-900);
-  text-decoration: none;
-}
-.notice-card-title a::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-}
-.notice-card-title a:hover {
-  color: var(--color-accent-highlight);
-}
-.notice-card-title a:focus-visible::after {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-  border-radius: 4px;
-}
-.notice-category,
-.notice-pin-badge {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-gray-500);
-}
+
 .notice-pin-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--color-accent-highlight);
 }
+
 .notice-category {
-  letter-spacing: 0.02em;
-}
-.notice-card-content {
+  font-size: 12.5px;
+  font-weight: 500;
   color: var(--color-gray-500);
-  font-size: 14px;
-  line-height: 1.8;
-  white-space: normal;
+}
+
+.notice-pin-badge + .notice-category::before {
+  content: "·";
+  margin-right: 10px;
+  color: var(--color-gray-300);
+}
+
+.page .notice-card-title {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
+}
+
+.notice-card-title a {
+  color: var(--color-gray-900);
+}
+
+.notice-card-title a:hover {
+  color: var(--color-accent-highlight);
+}
+
+.notice-card-actions {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity var(--dur-state) ease;
+}
+
+.notice-card:hover .notice-card-actions,
+.notice-card-actions:focus-within {
+  opacity: 1;
+}
+
+.notice-card-actions .btn {
+  min-height: 32px;
+  padding: 0 10px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-gray-600);
+  font-size: 13px;
+}
+
+.notice-card-actions .btn:hover:not(:disabled) {
+  background: var(--color-bg-elevated);
+  border-color: transparent;
+  color: var(--color-gray-900);
+}
+
+.notice-card-actions .btn-danger {
+  color: var(--color-danger);
+}
+
+.notice-card-actions .btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.notice-card-content {
+  max-width: 72ch;
   margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--color-gray-600);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
-  max-width: 75ch;
 }
+
 .notice-card-footer {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 13px;
   color: var(--color-gray-500);
-  padding-top: 18px;
-  margin-top: 6px;
-  border-top: 1px solid var(--color-gray-200);
+  font-variant-numeric: tabular-nums;
 }
+
 .notice-meta-item {
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
-.notice-card-actions {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  flex-shrink: 0;
+
+.notice-meta-icon {
+  color: var(--color-gray-400);
 }
-.notice-card-actions .btn {
-  background: transparent;
-  box-shadow: none;
-  border-color: var(--color-gray-200);
-}
-.notice-card-actions .is-pinned-btn {
-  color: var(--color-accent-highlight);
-  border-color: var(--color-accent-border);
-}
+
+/* Inline edit */
 .notice-inline-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 }
+
+.notice-inline-form > label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-800);
+}
+
 .inline-form-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: 16px;
 }
+
 .inline-form-title {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-gray-900);
 }
+
 .inline-close-btn {
-  background: transparent;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
   border: 0;
-  padding: 8px;
+  border-radius: var(--radius-md);
+  background: transparent;
   color: var(--color-gray-500);
   cursor: pointer;
-  display: flex;
 }
+
+.inline-close-btn:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-gray-900);
+}
+
 .notice-inline-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
+
 .notices-empty {
-  background: transparent;
-  box-shadow: none;
-  border: 0;
-  text-align: center;
-  padding: 40px 0;
+  border-style: dashed;
 }
-.notices-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-}
-@media (max-width: 800px) {
-  .notices-list {
-    grid-template-columns: 1fr;
+
+@media (max-width: 640px) {
+  .notices-list .notice-card {
+    padding: 18px 16px;
   }
   .notice-card-header {
     flex-direction: column;
-    gap: 14px;
-  }
-  .notice-card {
-    padding: 22px;
-  }
-  .notice-card-title {
-    font-size: 18px;
+    gap: 10px;
   }
   .notice-card-actions {
-    gap: 8px;
-  }
-  .notice-card-footer {
-    font-size: 11px;
+    opacity: 1;
+    margin-left: -10px;
   }
 }

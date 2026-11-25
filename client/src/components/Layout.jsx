@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import Navbar from "./Navbar";
 
 /**
@@ -40,23 +40,24 @@ export default function Layout() {
       </a>
       <Navbar collapsed={collapsed} onToggle={toggleSidebar} />
       <main className="main-content" id="main-content" tabIndex={-1}>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={reduceMotion ? false : { opacity: 1, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 1 } : { opacity: 1, y: -4 }}
-            transition={{ duration: reduceMotion ? 0 : 0.16, ease: "easeOut" }}
-            style={{
-              width: "100%",
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-            }}
+        <motion.div
+          key={location.pathname}
+          className="route-frame"
+          initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <Suspense
+            fallback={
+              <div className="route-loading" role="status">
+                <span className="spinner" aria-hidden="true" />
+                Loading…
+              </div>
+            }
           >
             <Outlet />
-          </motion.div>
-        </AnimatePresence>
+          </Suspense>
+        </motion.div>
       </main>
     </div>
   );

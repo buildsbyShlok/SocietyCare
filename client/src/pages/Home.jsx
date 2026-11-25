@@ -1,10 +1,18 @@
 import { Link } from "react-router-dom";
-import { MapPin } from "lucide-react";
-import { Load, Row, Section, useResource } from "../components/Workspace";
+import { MapPin, Clock3 } from "lucide-react";
+import { Load, Section, useResource } from "../components/Workspace";
 import Courtyard from "../components/Courtyard";
 import HomeAnnouncements from "../components/HomeAnnouncements";
 import { useAuth } from "../context/AuthContext";
 import "./Home.css";
+
+function greeting(name) {
+  const hour = new Date().getHours();
+  const part = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const first = (name || "").trim().split(/\s+/)[0];
+  return first ? part + ", " + first : part;
+}
+
 export default function Home() {
   const info = useResource("/society"),
     events = useResource("/events?upcoming=true&limit=3");
@@ -16,11 +24,12 @@ export default function Home() {
           <>
             <header className="home-heading">
               <div>
+                <p className="ws-kicker">{greeting(user.name)}</p>
                 <h1>{s?.name || "Your society"}</h1>
                 <p>{s?.description || "Your society, in one place."}</p>
                 {s?.address && (
                   <span className="home-address">
-                    <MapPin size={14} />
+                    <MapPin size={14} aria-hidden="true" />
                     {s.address}
                   </span>
                 )}
@@ -58,15 +67,31 @@ export default function Home() {
         <Load source={events}>
           {({ items }) =>
             items.length ? (
-              items.map((e) => (
-                <Row
-                  key={e.id}
-                  to={"/events/" + e.id}
-                  title={e.title}
-                  detail={new Date(e.startsAt).toLocaleString()}
-                  meta={e.location}
-                />
-              ))
+              items.map((e) => {
+                const d = new Date(e.startsAt);
+                return (
+                  <Link key={e.id} className="ws-row home-event" to={"/events/" + e.id}>
+                    <span className="home-event-date" aria-hidden="true">
+                      <small>{d.toLocaleString("en-IN", { month: "short" })}</small>
+                      <b>{d.getDate()}</b>
+                    </span>
+                    <span className="home-event-text">
+                      <strong>{e.title}</strong>
+                      <small>
+                        <Clock3 size={13} aria-hidden="true" />
+                        {d.toLocaleString("en-IN", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                        {e.location && " · " + e.location}
+                      </small>
+                    </span>
+                  </Link>
+                );
+              })
             ) : (
               <p>
                 No upcoming events.{" "}

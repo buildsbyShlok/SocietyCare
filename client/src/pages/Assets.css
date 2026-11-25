@@ -72,3 +72,60 @@
   .asset-print-label .asset-print-brand { display: block; font-weight: 600; }
   .asset-print-label img { width: 70mm; max-width: 100%; }
 }
+
+/* ── Quiet Estate: assets as one ruled list ───────────────── */
+.asset-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-surface);
+  overflow: hidden;
+}
+.asset-card {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 0.7fr) 96px 20px;
+  grid-template-areas:
+    "icon name loc cat status arrow"
+    "icon code loc cat status arrow";
+  align-items: center;
+  column-gap: 18px;
+  row-gap: 2px;
+  padding: 16px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--color-gray-200);
+  border-radius: 0;
+  transition: background-color var(--dur-state) ease;
+}
+.asset-card:last-child { border-bottom: 0; }
+.asset-card:hover { background: var(--color-bg-elevated); border-color: var(--color-gray-200); }
+.asset-card-top, .asset-card-bottom { display: contents; }
+.asset-card-top > svg {
+  grid-area: icon;
+  width: 40px; height: 40px; padding: 10px;
+  border-radius: 10px;
+  background: var(--color-accent-light);
+  color: var(--color-accent-highlight);
+}
+.asset-card-top > .asset-status { grid-area: status; justify-self: start; }
+.asset-card .asset-code { grid-area: code; font-size: 12.5px; }
+.page .asset-card h2 { grid-area: name; margin: 0; font-size: 15px; font-weight: 550; letter-spacing: -0.01em; }
+.asset-card .asset-location { grid-area: loc; margin: 0; font-size: 14px; align-items: center; }
+.asset-card .asset-location svg { margin-top: 0; color: var(--color-gray-500); }
+.asset-card-bottom > span { grid-area: cat; font-size: 14px; color: var(--color-gray-600); }
+.asset-card-bottom > svg { grid-area: arrow; color: var(--color-gray-400); transition: transform var(--dur-state) var(--ease-out); }
+.asset-card:hover .asset-card-bottom > svg { transform: translate(2px, -2px); color: var(--color-gray-900); }
+.asset-status { padding: 3px 10px; font-size: 12px; font-weight: 500; }
+.asset-detail-grid { gap: 32px; }
+.asset-qr { border-radius: var(--radius-lg); }
+@media (max-width: 860px) {
+  .asset-card {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "icon name status"
+      "icon code status"
+      "icon loc loc";
+  }
+  .asset-card-bottom { display: none; }
+}

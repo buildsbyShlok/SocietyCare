@@ -1,7 +1,9 @@
-import Welcome from '../pages/Welcome';
+import { lazy } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from './Layout';
+
+const Welcome = lazy(() => import('../pages/Welcome'));
 
 /**
  * ProtectedRoute — guards all authenticated routes.
@@ -26,15 +28,25 @@ export default function ProtectedRoute({ requiredRole }) {
   const { user, token, loading, sessionError, retrySession, logout } = useAuth();
 
   if (loading) {
-    return <div className="loading-screen">Loading...</div>;
+    return (
+      <div className="loading-screen" role="status">
+        <span className="spinner" aria-hidden="true" />
+        Loading your society…
+      </div>
+    );
   }
 
   if (token && sessionError) {
-    return <div className="page" role="alert">
-      <p>{sessionError}</p>
-      <button className="btn btn-primary" onClick={retrySession}>Retry</button>
-      <button className="btn btn-secondary" onClick={logout}>Sign out</button>
-    </div>;
+    return (
+      <div className="loading-screen session-error" role="alert">
+        <h1>We couldn’t restore your session</h1>
+        <p>{sessionError}</p>
+        <div className="session-error-actions">
+          <button className="btn btn-primary" onClick={retrySession}>Try again</button>
+          <button className="btn btn-secondary" onClick={logout}>Sign out</button>
+        </div>
+      </div>
+    );
   }
 
   if (!token || !user) {

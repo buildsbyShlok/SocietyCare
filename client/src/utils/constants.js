@@ -32,7 +32,7 @@ export const CATEGORY = Object.freeze({
 
 export const STATUS_LABELS = Object.freeze({
   OPEN: 'Open',
-  IN_PROGRESS: 'In Progress',
+  IN_PROGRESS: 'In progress',
   RESOLVED: 'Resolved',
 });
 

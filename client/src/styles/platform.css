@@ -20,74 +20,7 @@
   letter-spacing: 0.04em;
   margin-bottom: 4px;
 }
-.ws-brand {
-  font-family: var(--font-heading);
-  letter-spacing: -0.035em;
-}
-.ws-brand svg {
-  flex-shrink: 0;
-}
-.ws-brand span {
-  color: var(--color-gray-900);
-}
-.app-navigation {
-  background: var(--color-bg-surface);
-}
-.app-navigation .nav-link {
-  font-size: 13px;
-  min-height: 42px;
-  padding: 10px 12px;
-}
-.app-navigation .nav-link.active {
-  background: var(--color-accent-light);
-  color: var(--color-accent-highlight);
-}
-.app-navigation .nav-link.active::before {
-  display: none;
-}
-.app-navigation .nav-link svg {
-  flex-shrink: 0;
-}
-.app-navigation .ws-nav-caption {
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  margin: 24px 12px 12px;
-}
-.app-navigation .ws-tools {
-  margin-top: 20px;
-  padding-top: 16px;
-  justify-content: space-between;
-}
-.app-navigation .ws-tools button {
-  min-width: 36px;
-  min-height: 36px;
-  border-radius: 6px;
-}
-.app-navigation .ws-tools button:hover {
-  background: var(--color-bg-hover);
-  color: var(--color-gray-900);
-}
-.btn {
-  min-height: 40px;
-  font-size: 13px;
-  font-weight: 500;
-}
-.btn-primary,
-.btn-primary:hover:not(:disabled) {
-  color: var(--color-on-accent) !important;
-  border-color: var(--color-accent);
-  box-shadow: none;
-}
-.btn-danger {
-  background: var(--color-danger-light);
-  color: var(--color-danger);
-  border-color: var(--color-danger-border);
-}
-.btn-danger:hover:not(:disabled) {
-  color: var(--color-danger) !important;
-  background: var(--color-danger-light);
-  border-color: var(--color-danger);
-}
+
 :is(
   .form-input,
   .form-select,
@@ -130,13 +63,7 @@
 .ws-row small {
   line-height: 1.7;
 }
-.home-heading h1 {
-  font-size: clamp(30px, 3.5vw, 44px);
-}
-.home-notice h3 {
-  font-family: var(--font-heading);
-  font-size: 21px;
-}
+
 .metric-value {
   font-family: var(--font-heading);
   font-weight: 600;
@@ -160,46 +87,16 @@
 .chat-body {
   font-size: 15px;
 }
-.skip-link {
-  position: fixed;
-  z-index: 3000;
-  top: 12px;
-  left: 12px;
-  transform: translateY(-160%);
-  padding: 12px 18px;
-  border-radius: 6px;
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-.skip-link:focus {
-  transform: none;
-  color: var(--color-on-accent);
-}
+
 @media (max-width: 768px) {
-  .app-navigation,
-  .app-navigation.collapsed {
-    backdrop-filter: none;
-    width: 100%;
-    padding: 10px 12px;
-  }
-  .app-navigation .ws-tools {
-    margin: 0;
-    padding: 0;
-  }
-  .app-navigation .nav-link {
-    min-height: 42px;
-    padding: 9px 10px;
-    font-size: 12px;
-  }
-  .app-layout .main-content {
-    padding-top: 108px;
-  }
+
+
+
+
   .page {
     padding: 20px 16px 32px;
   }
-  .app-layout .main-content .page {
-    padding-top: 20px;
-  }
+
   .page h1 {
     font-size: 28px;
   }
@@ -215,13 +112,8 @@
   .chat-compose-row textarea {
     font-size: 16px;
   }
-  .app-navigation .nav-menu {
-    padding-top: 6px;
-    scrollbar-width: thin;
-  }
-  .app-navigation .nav-link span {
-    white-space: nowrap;
-  }
+
+
 }
 
 /* Modal and private resident records. */
@@ -311,48 +203,16 @@ dialog.sc-dialog .dup-modal-close {
 .settings-section-title {
   font-family: var(--font-heading);
 }
-.app-navigation .mobile-menu-toggle {
-  display: none;
-}
+
 @media (max-width: 768px) {
-  .app-navigation,
-  .app-navigation.collapsed {
-    overflow: visible;
-  }
-  .app-navigation .mobile-menu-toggle {
-    display: inline-flex;
-  }
-  .app-navigation .nav-menu {
-    display: none;
-  }
-  .app-navigation .nav-menu.is-open {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    max-height: calc(100dvh - 76px);
-    overflow: auto;
-    padding: 12px;
-    background: var(--color-bg-surface);
-    border-bottom: 1px solid var(--color-gray-200);
-  }
-  .app-navigation .nav-link {
-    white-space: normal;
-    min-width: 0;
-    min-height: 48px;
-  }
-  .app-navigation .nav-link span {
-    white-space: normal;
-  }
-  .app-navigation .ws-tools button {
-    min-width: 40px;
-    min-height: 40px;
-  }
-  .app-layout .main-content {
-    padding-top: 76px;
-  }
+
+
+
+
+
+
+
+
   .resident-record-heading {
     padding: 20px;
   }

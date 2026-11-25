@@ -487,3 +487,163 @@
     width: 100%;
   }
 }
+
+/* ── Quiet Estate refinements ─────────────────────────────── */
+.complaint-detail-workspace {
+  gap: 20px;
+}
+
+.complaint-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-gray-600);
+}
+
+.complaint-back-link:hover {
+  color: var(--color-gray-900);
+  text-decoration: none;
+}
+
+.detail-header-badges {
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.complaint-id-mono {
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-gray-200);
+  background: var(--color-bg-elevated);
+  color: var(--color-gray-600);
+  font: 500 12px var(--font-mono);
+}
+
+.page .detail-ticket-title {
+  margin: 6px 0 4px;
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+}
+
+.detail-meta-subtitle {
+  font-size: 13.5px;
+  color: var(--color-gray-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.complaint-detail-layout {
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+.complaint-detail-main,
+.complaint-detail-sidebar {
+  gap: 16px;
+}
+
+.complaint-detail-workspace .workspace-panel {
+  padding: 20px;
+  border-radius: var(--radius-lg);
+}
+
+.complaint-detail-workspace .panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-gray-900);
+  text-transform: none;
+}
+
+.complaint-detail-workspace .panel-title-icon {
+  color: var(--color-gray-500);
+}
+
+.complaint-detail-description {
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.complaint-detail-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-gray-700);
+}
+
+.complaint-history-note {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  border: 0;
+  border-left: 2px solid var(--color-accent);
+  background: var(--color-bg-elevated);
+  font-size: 14px;
+  color: var(--color-gray-700);
+}
+
+.complaint-history-meta {
+  font-size: 12.5px;
+  color: var(--color-gray-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.complaint-history-dot {
+  background: var(--color-accent);
+  border-color: var(--color-bg-surface);
+}
+
+.metadata-item {
+  padding: 10px 0;
+}
+
+.metadata-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-gray-500);
+}
+
+.metadata-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-gray-900);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.metadata-value.font-mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 400;
+}
+
+.transition-panel {
+  border-color: var(--color-accent-border) !important;
+  box-shadow: inset 0 2px 0 var(--color-accent);
+}
+
+.btn-submit-transition {
+  width: 100%;
+}
+
+.linked-equipment dl {
+  margin-top: 12px;
+}
+
+.linked-equipment dd {
+  font-size: 14px;
+  color: var(--color-gray-900);
+}
+
+@media (max-width: 960px) {
+  .complaint-detail-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

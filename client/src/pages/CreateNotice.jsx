@@ -79,15 +79,15 @@ export default function CreateNotice() {
       <div className="back-navigation-container">
         <Link to="/notices" className="complaint-back-link">
           <ArrowLeft size={14} />
-          <span>Back to Bulletin Board</span>
+          <span>All announcements</span>
         </Link>
       </div>
 
       <header className="page-header">
         <div className="page-header-title">
-          <h1>Publish Announcement</h1>
+          <h1>New announcement</h1>
           <p className="page-header-subtitle">
-            Broadcast an official society notice to the community bulletin board
+            Published announcements appear on the board and on every resident’s Home page.
           </p>
         </div>
       </header>
@@ -111,7 +111,7 @@ export default function CreateNotice() {
           <div className="form-group">
             <div className="form-label-row">
               <label htmlFor="notice-title" className="form-label">
-                Announcement Title <span className="text-danger">*</span>
+                Title
               </label>
               <span className="character-count-indicator">{form.title.length} / 150</span>
             </div>
@@ -122,7 +122,7 @@ export default function CreateNotice() {
               className={`form-input${fieldErrors.title ? ' is-error' : ''}`}
               value={form.title}
               onChange={handleChange}
-              placeholder="e.g. Scheduled Water Tank Cleaning & Supply Interruption"
+              placeholder="e.g. Water tank cleaning on Sunday"
               maxLength={150}
               disabled={submitting}
               autoComplete="off"
@@ -134,7 +134,7 @@ export default function CreateNotice() {
           <div className="form-group">
             <div className="form-label-row">
               <label htmlFor="notice-content" className="form-label">
-                Detailed Body <span className="text-danger">*</span>
+                Message
               </label>
               <span className="character-count-indicator">{form.content.length} / 5000</span>
             </div>
@@ -144,7 +144,7 @@ export default function CreateNotice() {
               className={`form-textarea${fieldErrors.content ? ' is-error' : ''}`}
               value={form.content}
               onChange={handleChange}
-              placeholder="Write the full broadcast announcement, schedule, affected wings/flats, and instructions for residents…"
+              placeholder="What is happening, when, which towers or flats are affected, and what residents should do."
               rows={7}
               disabled={submitting}
             />
@@ -178,11 +178,11 @@ export default function CreateNotice() {
               <div className="pin-toggle-header">
                 <Pin size={14} className="pin-toggle-icon" />
                 <label htmlFor="notice-important" className="pin-toggle-label">
-                  Mark as High Priority Pinned Announcement
+                  Pin to the top of the board
                 </label>
               </div>
               <p className="pin-toggle-desc">
-                Pins this bulletin to the top of the community board and highlights it on the resident dashboard.
+                Pinned announcements stay above newer ones and are marked on Home. Use it for things residents must not miss.
               </p>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default function CreateNotice() {
               ) : (
                 <>
                   <Send size={14} />
-                  <span>Publish Announcement</span>
+                  <span>Publish announcement</span>
                 </>
               )}
             </button>

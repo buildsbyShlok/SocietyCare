@@ -7,8 +7,9 @@ import "./styles/global.css";
 import "./styles/workspace.css";
 import "./styles/polish.css";
 import "./styles/platform.css";
+import "./styles/estate.css";
 document.documentElement.dataset.theme =
-  localStorage.getItem("society-theme") === "light" ? "light" : "dark";
+  localStorage.getItem("society-theme") === "dark" ? "dark" : "light";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

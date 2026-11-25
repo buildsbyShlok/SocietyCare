@@ -19,17 +19,21 @@ export default function Events() {
   return (
     <div className="page ws-page">
       <header className="page-header">
-        <div>
-          <h1>Life beyond your doorstep</h1>
-          <p>Gatherings, celebrations and things to look forward to.</p>
+        <div className="page-header-title">
+          <h1>Events</h1>
+          <p className="page-header-subtitle">
+            Gatherings, celebrations and things to look forward to. Anyone in
+            the society can publish one.
+          </p>
         </div>
         <Link className="btn btn-primary" to="/events/new">
           Create event
         </Link>
       </header>
-      <div className="ws-inline">
+      <div className="segmented" role="group" aria-label="Which events to show">
         <button
-          className={"btn " + (upcoming ? "btn-primary" : "btn-secondary")}
+          className="segmented-btn"
+          aria-pressed={upcoming}
           onClick={() => {
             setUpcoming(true);
             setPage(1);
@@ -38,7 +42,8 @@ export default function Events() {
           Upcoming
         </button>
         <button
-          className={"btn " + (!upcoming ? "btn-primary" : "btn-secondary")}
+          className="segmented-btn"
+          aria-pressed={!upcoming}
           onClick={() => {
             setUpcoming(false);
             setPage(1);
@@ -89,10 +94,14 @@ export default function Events() {
                 ))}
               </div>
             ) : (
-              <p>
-                No {upcoming ? "upcoming " : ""}events yet. Create one to bring
-                your neighbours together.
-              </p>
+              <div className="empty-state">
+                <CalendarDays size={28} aria-hidden="true" />
+                <h3>No {upcoming ? "upcoming " : ""}events yet</h3>
+                <p>Create one to bring your neighbours together.</p>
+                <Link className="btn btn-primary btn-sm" to="/events/new">
+                  Create event
+                </Link>
+              </div>
             )}
             {(page > 1 || data.hasNext) && (
               <nav className="event-pagination" aria-label="Event pages">
@@ -140,7 +149,7 @@ export function EventDetail() {
   }
   return (
     <div className="page ws-page">
-      <Link to="/events">Back to events</Link>
+      <Link className="back-link" to="/events">All events</Link>
       <Load source={source}>
         {(e) => (
           <article className="event-reading">
@@ -159,7 +168,7 @@ export function EventDetail() {
                 <strong>{new Date(e.startsAt).getDate()}</strong>
               </div>
               <div>
-                <span className="ws-kicker">SOCIETY EVENT</span>
+                <span className="ws-kicker">Society event</span>
                 <h1>{e.title}</h1>
               </div>
             </header>
@@ -239,8 +248,8 @@ export function EventEditor() {
   const source = useResource(id ? "/events/" + encodeURIComponent(id) : null);
   return (
     <div className="page ws-page">
-      <Link to={id ? "/events/" + id : "/events"}>Back to events</Link>
-      <h1>{id ? "Edit event" : "Bring your neighbours together"}</h1>
+      <Link className="back-link" to={id ? "/events/" + id : "/events"}>{id ? "Back to event" : "All events"}</Link>
+      <h1>{id ? "Edit event" : "Create an event"}</h1>
       {id ? (
         <Load source={source}>{(e) => <EventForm key={e.id} event={e} />}</Load>
       ) : (

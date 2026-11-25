@@ -48,9 +48,10 @@ export default function App() {
       <PageBoundary resetKey={location.pathname}>
         <Suspense
           fallback={
-            <p className="loading-screen" role="status">
-              Loading workspace…
-            </p>
+            <div className="loading-screen" role="status">
+              <span className="spinner" aria-hidden="true" />
+              Loading…
+            </div>
           }
         >
           <Routes>

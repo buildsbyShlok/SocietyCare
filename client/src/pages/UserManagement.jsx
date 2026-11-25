@@ -52,11 +52,11 @@ export default function UserManagement() {
   const admin=currentUser?.role==="ADMIN";
   return <div className="page user-management-page">
     <header className="page-header"><div className="page-header-title">
-      <h1>Resident Directory</h1><p className="page-header-subtitle">Member records and account access</p>
+      <h1>Resident directory</h1><p className="page-header-subtitle">Everyone with an account in your society, their unit and their access.</p>
     </div></header>
     <nav className="settings-tabs" aria-label="Account settings">
-      <Link to="/settings" className="settings-tab"><User size={14}/>My Profile</Link>
-      <Link to="/settings/users" className="settings-tab active" aria-current="page"><Users size={14}/>Resident Directory</Link>
+      <Link to="/settings" className="settings-tab"><User size={14}/>My profile</Link>
+      <Link to="/settings/users" className="settings-tab active" aria-current="page"><Users size={14}/>Resident directory</Link>
     </nav>
     {successMessage && <div className="alert alert-success" role="status"><CheckCircle2 size={16}/><span>{successMessage}</span></div>}
     {error && <div className="alert alert-error" role="alert"><AlertCircle size={16}/><span>{error}</span></div>}
@@ -81,12 +81,12 @@ export default function UserManagement() {
               <td className="directory-identity"><div className="user-info-cell">
                 <div className="user-avatar-cell">{u.avatarUrl?<img src={u.avatarUrl} alt="" className="user-avatar-img"/>:(u.name||"?").slice(0,1).toUpperCase()}</div>
                 <div className="user-name-email"><span className="user-cell-name"><Link to={"/admin/residents/"+u.id}>{u.name}</Link>{self&&<span className="self-tag">You</span>}</span>
-                  <span className="user-cell-email"><Mail size={11}/>{u.email}</span>
+                  <span className="user-cell-email">{u.email}</span>
                 </div>
               </div></td>
               <td data-label="Unit"><span className="user-cell-flat-badge"><Home size={12}/>{[u.tower,u.flatNumber].filter(Boolean).join(" / ")||"Not recorded"}</span></td>
               <td data-label="Phone"><span className="user-cell-phone"><Phone size={12}/>{u.phone||"Not provided"}</span></td>
-              <td data-label="Role">{u.disabled?<span className="text-muted">{u.enrollmentPending ? 'Pending approval' : 'Deactivated'}</span>:<span className={"role-badge role-badge--"+(u.role==="ADMIN"?"admin":"resident")}>{u.role==="ADMIN"?<ShieldCheck size={12}/>:<User size={12}/>} {u.role}</span>}</td>
+              <td data-label="Role">{u.disabled?<span className="text-muted">{u.enrollmentPending ? 'Pending approval' : 'Deactivated'}</span>:<span className={"role-badge role-badge--"+(u.role==="ADMIN"?"admin":"resident")}>{u.role==="ADMIN"?<ShieldCheck size={12}/>:<User size={12}/>} {u.role==="ADMIN"?"Admin":"Resident"}</span>}</td>
               <td className="directory-actions-cell"><div className="directory-actions" role="group" aria-label={"Actions for "+u.name}>
                 <Link className="btn btn-secondary btn-sm" to={"/admin/residents/"+u.id}><Eye size={14}/>View</Link>
                 {admin && u.enrollmentPending && <button type="button" className="btn btn-secondary btn-sm" disabled={loading || Boolean(actioningId)} onClick={()=>approve(u)}>Approve enrollment</button>}
